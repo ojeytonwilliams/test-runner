@@ -1,0 +1,16 @@
+{
+  "name": "test-runner",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Oliver Eyton-Williams",
+    "email": "ojeytonwilliams@gmail.com"
+  },
+  "license": "BSD-3-Clause",
+  "packageManager": "pnpm@10.6.2"
+}
