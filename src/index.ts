@@ -1,3 +1,3 @@
-export function dummy () {
-	return 'something'
+export function dummy() {
+	return "something";
 }

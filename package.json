@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "lint": "eslint . && prettier --list-different ."
+    "lint": "eslint . && prettier --list-different .",
+    "format": "prettier --write ."
   },
   "type": "module",
   "keywords": [],
