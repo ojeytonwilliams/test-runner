@@ -6,6 +6,7 @@ const presetConfig = createJsWithTsEsmPreset({
 
 const jestConfig = {
 	...presetConfig,
+	preset: "jest-puppeteer",
 };
 
 export default jestConfig;
