@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "test:watch": "webpack --env development --watch & jest --watch",
     "lint": "eslint . && prettier --list-different .",
     "build": "webpack",
     "format": "prettier --write .",
