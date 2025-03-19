@@ -3,8 +3,7 @@ import "expect-puppeteer";
 
 describe("Test Runner", () => {
 	beforeAll(async () => {
-		// served by webpack-dev-server
-		await page.goto("http://localhost:8080/");
+		await page.goto("http://localhost:8080/__fixtures__/");
 	});
 	it("should add a FCCSandbox to the window object", async () => {
 		const sandbox = await page.evaluate(() => {
