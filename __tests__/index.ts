@@ -49,6 +49,16 @@ describe("Test Runner", () => {
 				expect(before).toBeTruthy();
 				expect(after).toBeFalsy();
 			});
+
+			it("should remove existing iframe before creating a new one", async () => {
+				await page.evaluate(() => {
+					window.FCCSandbox.createTestRunner();
+					window.FCCSandbox.createTestRunner();
+				});
+
+				const iframes = await page.$$("iframe");
+				expect(iframes.length).toBe(1);
+			});
 		});
 	});
 });

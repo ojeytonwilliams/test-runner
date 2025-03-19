@@ -32,6 +32,7 @@ class FCCSandbox {
 	}
 
 	createTestRunner() {
+		this.#testRunner?.dispose();
 		this.#testRunner = new TestRunner(document.createElement("iframe"));
 
 		return this.#testRunner;
