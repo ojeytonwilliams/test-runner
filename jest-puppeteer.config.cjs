@@ -11,7 +11,7 @@ module.exports = {
 		],
 	},
 	server: {
-		command: "pnpm http-server",
+		command: "webpack serve --env development",
 		port: 8080,
 	},
 };

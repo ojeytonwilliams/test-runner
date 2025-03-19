@@ -1,5 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 module.exports = (env = {}) => {
 	const isDev = env.development;
+
+	const plugins = isDev ? [new HtmlWebpackPlugin()] : [];
 
 	return {
 		mode: isDev ? "development" : "production",
@@ -30,5 +35,6 @@ module.exports = (env = {}) => {
 		resolve: {
 			extensions: [".ts", ".js"],
 		},
+		plugins,
 	};
 };
