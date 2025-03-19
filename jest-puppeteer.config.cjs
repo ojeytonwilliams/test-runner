@@ -10,4 +10,8 @@ module.exports = {
 			"--disable-renderer-backgrounding",
 		],
 	},
+	server: {
+		command: "pnpm http-server ./__fixtures__/page",
+		port: 8080,
+	}
 };

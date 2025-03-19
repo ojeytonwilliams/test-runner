@@ -1,10 +1,11 @@
-import { dummy } from "../src";
-describe("Test Test", () => {
-	it("should pass", () => {
-		expect(true).toBe(true);
-	});
+import "jest-puppeteer";
+import "expect-puppeteer";
 
-	it("should match expectations", () => {
-		expect(dummy()).toBe("something");
+describe("Test Test", () => {
+	beforeAll(async () => {
+		await page.goto("http://localhost:8080");
+	});
+	it("should match expectations", async () => {
+		await expect(page).toMatchTextContent("Hello World");
 	});
 });
