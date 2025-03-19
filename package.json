@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "test:watch": "webpack --env development --watch & jest --watch",
+    "install-puppeteer-browser": "puppeteer browsers install chrome",
     "lint": "eslint . && prettier --list-different .",
     "build": "webpack",
     "format": "prettier --write .",

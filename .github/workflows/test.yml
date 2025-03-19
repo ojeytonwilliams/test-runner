@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install Chrome for Puppeteer (necessary because it doesn't get cached)
+        run: pnpm install-puppeteer-browser
+
       - name: Build
         run: pnpm build
 
