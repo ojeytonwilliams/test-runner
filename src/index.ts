@@ -4,8 +4,15 @@ export {};
 
 declare global {
 	interface Window {
-		FCCSandbox?: unknown;
+		FCCSandbox: FCCSandbox;
 	}
 }
 
-window.FCCSandbox = "something";
+class FCCSandbox {
+	createTestRunner() {
+		const iframe = document.createElement("iframe");
+		document.body.appendChild(iframe);
+	}
+}
+
+window.FCCSandbox = new FCCSandbox();

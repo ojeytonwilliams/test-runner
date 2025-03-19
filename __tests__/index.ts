@@ -6,10 +6,26 @@ describe("Test Runner", () => {
 		await page.goto("http://localhost:8080/__fixtures__/");
 	});
 	it("should add a FCCSandbox to the window object", async () => {
-		const actual = await page.evaluate(() => {
+		const sandbox = await page.evaluate(() => {
 			return window.FCCSandbox;
 		});
 
-		expect(actual).toBe("something");
+		expect(sandbox).toMatchObject({});
+	});
+
+	describe("FCCSandbox", () => {
+		describe("createTestRunner", () => {
+			it("should attach a iframe to the document", async () => {
+				const before = await page.$("iframe");
+				await page.evaluate(() => {
+					window.FCCSandbox.createTestRunner();
+				});
+
+				const after = await page.$("iframe");
+
+				expect(before).toBeFalsy();
+				expect(after).toBeTruthy();
+			});
+		});
 	});
 });
