@@ -11,7 +11,10 @@ declare global {
 class TestRunner {
 	#iframe: HTMLIFrameElement;
 
-	constructor(iframe: HTMLIFrameElement) {
+	constructor({ source }: { source: string }) {
+		const iframe = document.createElement("iframe");
+		iframe.sandbox.add("allow-scripts");
+		iframe.srcdoc = source;
 		this.#iframe = iframe;
 		document.body.appendChild(iframe);
 	}
@@ -31,9 +34,9 @@ class FCCSandbox {
 		return this.#testRunner;
 	}
 
-	createTestRunner() {
+	createTestRunner({ source }: { source: string }) {
 		this.#testRunner?.dispose();
-		this.#testRunner = new TestRunner(document.createElement("iframe"));
+		this.#testRunner = new TestRunner({ source });
 
 		return this.#testRunner;
 	}
