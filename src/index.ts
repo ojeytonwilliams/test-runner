@@ -8,10 +8,33 @@ declare global {
 	}
 }
 
-class FCCSandbox {
-	createTestRunner() {
-		const iframe = document.createElement("iframe");
+class TestRunner {
+	#iframe: HTMLIFrameElement;
+
+	constructor(iframe: HTMLIFrameElement) {
+		this.#iframe = iframe;
 		document.body.appendChild(iframe);
+	}
+
+	dispose() {
+		this.#iframe.remove();
+	}
+}
+
+class FCCSandbox {
+	#testRunner: TestRunner | null;
+
+	constructor() {
+		this.#testRunner = null;
+	}
+	get testRunner() {
+		return this.#testRunner;
+	}
+
+	createTestRunner() {
+		this.#testRunner = new TestRunner(document.createElement("iframe"));
+
+		return this.#testRunner;
 	}
 }
 

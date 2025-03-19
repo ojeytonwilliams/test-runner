@@ -14,8 +14,15 @@ describe("Test Runner", () => {
 	});
 
 	describe("FCCSandbox", () => {
-		describe("createTestRunner", () => {
-			it("should attach a iframe to the document", async () => {
+		describe("TestRunner", () => {
+			beforeEach(async () => {
+				// clear the page
+				await page.evaluate(() => {
+					document.body.innerHTML = "";
+				});
+			});
+
+			it("should be instantiated by createTestRunner", async () => {
 				const before = await page.$("iframe");
 				await page.evaluate(() => {
 					window.FCCSandbox.createTestRunner();
@@ -25,6 +32,22 @@ describe("Test Runner", () => {
 
 				expect(before).toBeFalsy();
 				expect(after).toBeTruthy();
+			});
+
+			it("should be disposable", async () => {
+				page.evaluate(() => {
+					window.FCCSandbox.createTestRunner();
+				});
+
+				const before = await page.$("iframe");
+				await page.evaluate(() => {
+					window.FCCSandbox.testRunner?.dispose();
+				});
+
+				const after = await page.$("iframe");
+
+				expect(before).toBeTruthy();
+				expect(after).toBeFalsy();
 			});
 		});
 	});
