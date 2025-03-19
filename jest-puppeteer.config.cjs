@@ -11,7 +11,7 @@ module.exports = {
 		],
 	},
 	server: {
-		command: "pnpm http-server ./__fixtures__/page",
+		command: "pnpm http-server",
 		port: 8080,
 	},
 };

@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint . && prettier --list-different .",
+    "build": "webpack",
     "format": "prettier --write .",
     "prepare": "husky"
   },
@@ -31,8 +32,11 @@
     "prettier": "^3.5.3",
     "puppeteer": "^24.4.0",
     "ts-jest": "^29.2.6",
+    "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.1"
+    "typescript-eslint": "^8.26.1",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
