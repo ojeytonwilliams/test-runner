@@ -86,6 +86,18 @@ describe("Test Runner", () => {
 
 				expect(isReady).toBe(undefined);
 			});
+
+			it("should run tests against the sandboxed iframe", async () => {
+				const source = "<body><h1>Hello World</h1></body>";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({ source });
+					return runner.runTest(
+						"document.body.innerHTML.includes(`<h1>Hello World</h1>`)",
+					);
+				}, source);
+
+				expect(result).toBe(true);
+			});
 		});
 	});
 });

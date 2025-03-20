@@ -6,6 +6,7 @@ module.exports = (env = {}) => {
 		cache: isDev ? { type: "filesystem" } : false,
 		entry: {
 			index: "./src/index.ts",
+			"test-messenger": "./src/test-messenger.ts",
 		},
 		output: {
 			filename: "[name].mjs",
