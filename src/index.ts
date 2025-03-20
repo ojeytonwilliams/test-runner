@@ -1,6 +1,4 @@
-// TODO: remove the dummy export once TS understands this is a module (i.e. it
-// has imports)
-export {};
+import { TestRunner } from "./test-runner";
 
 declare global {
 	interface Window {
@@ -8,24 +6,9 @@ declare global {
 	}
 }
 
-class TestRunner {
-	#iframe: HTMLIFrameElement;
-
-	constructor({ source }: { source: string }) {
-		const iframe = document.createElement("iframe");
-		iframe.sandbox.add("allow-scripts");
-		iframe.srcdoc = source;
-		this.#iframe = iframe;
-		document.body.appendChild(iframe);
-	}
-
-	dispose() {
-		this.#iframe.remove();
-	}
-}
-
 class FCCSandbox {
 	#testRunner: TestRunner | null;
+	TestRunner = TestRunner;
 
 	constructor() {
 		this.#testRunner = null;
@@ -34,9 +17,10 @@ class FCCSandbox {
 		return this.#testRunner;
 	}
 
-	createTestRunner({ source }: { source: string }) {
+	async createTestRunner({ source }: { source: string }) {
 		this.#testRunner?.dispose();
 		this.#testRunner = new TestRunner({ source });
+		await this.#testRunner.init();
 
 		return this.#testRunner;
 	}

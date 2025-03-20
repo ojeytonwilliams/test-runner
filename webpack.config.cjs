@@ -4,9 +4,11 @@ module.exports = (env = {}) => {
 	return {
 		mode: isDev ? "development" : "production",
 		cache: isDev ? { type: "filesystem" } : false,
-		entry: "./src/index.ts",
+		entry: {
+			index: "./src/index.ts",
+		},
 		output: {
-			filename: "bundle.mjs",
+			filename: "[name].mjs",
 			path: __dirname + "/dist",
 		},
 		module: {
