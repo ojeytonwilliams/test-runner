@@ -11,7 +11,7 @@ module.exports = {
 		],
 	},
 	server: {
-		command: "pnpm http-server",
+		command: "http-server",
 		port: 8080,
 	},
 };

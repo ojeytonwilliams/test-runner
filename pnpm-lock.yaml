@@ -32,6 +32,9 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@22.13.10)
+      jest-environment-puppeteer:
+        specifier: ^11.0.0
+        version: 11.0.0(typescript@5.8.2)
       jest-puppeteer:
         specifier: ^11.0.0
         version: 11.0.0(puppeteer@24.4.0(typescript@5.8.2))(typescript@5.8.2)
