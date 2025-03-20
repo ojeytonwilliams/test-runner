@@ -23,6 +23,21 @@ export class TestRunner {
 		});
 		document.body.appendChild(this.#iframe);
 		await isReady;
+
+		const isInitialized = new Promise((resolve) => {
+			window.addEventListener("message", function handler(event) {
+				if (event.data.type === "ready") {
+					resolve(true);
+				}
+			});
+		});
+
+		this.#iframe.contentWindow?.postMessage(
+			{ type: "init", value: { code: { contents: "" } } },
+			"*",
+		);
+
+		await isInitialized;
 	}
 
 	runTest(test: string) {

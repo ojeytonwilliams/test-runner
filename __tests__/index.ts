@@ -92,11 +92,11 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({ source });
 					return runner.runTest(
-						"document.body.innerHTML.includes(`<h1>Hello World</h1>`)",
+						"assert.include(document.body.innerHTML,`<h1>Hello World</h1>`)",
 					);
 				}, source);
 
-				expect(result).toBe(true);
+				expect(result).toEqual({ pass: true });
 			});
 		});
 	});
