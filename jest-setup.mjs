@@ -5,7 +5,7 @@ import setupPuppeteer from "jest-environment-puppeteer/setup";
 export default async (globalConfig) => {
 	// It's necessary spawnSync the webpack process to ensure that the build is
 	// complete before the tests start
-	const result = spawnSync("webpack", ["--color"], {
+	const result = spawnSync("webpack", ["--color", "--env", "development"], {
 		encoding: "utf8",
 	});
 
