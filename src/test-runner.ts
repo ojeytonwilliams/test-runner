@@ -1,5 +1,5 @@
 interface Runner {
-	init(): Promise<void>;
+	init(opts?: InitOptions): Promise<void>;
 	runTest(test: string): Promise<unknown>;
 	dispose(): void;
 }
@@ -22,6 +22,14 @@ type Config = {
 	script: string;
 };
 
+type InitOptions = {
+	code: {
+		contents?: string;
+		editableContents?: string;
+		original?: { [id: string]: string | null };
+	};
+};
+
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
 	#createTestEvaluator({ source, assetPath, script }: Config) {
@@ -40,7 +48,7 @@ export class FrameTestRunner implements Runner {
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
-	async init() {
+	async init(opts?: InitOptions) {
 		const isReady = new Promise((resolve) => {
 			this.#testEvaluator.addEventListener("load", () => {
 				resolve(true);
@@ -62,7 +70,15 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#testEvaluator.contentWindow?.postMessage({ type: "init" }, "*");
+		this.#testEvaluator.contentWindow?.postMessage(
+			{
+				type: "init",
+				value: {
+					code: opts?.code,
+				},
+			},
+			"*",
+		);
 
 		await isInitialized;
 	}

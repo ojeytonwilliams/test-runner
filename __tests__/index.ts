@@ -28,6 +28,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 				});
 
@@ -42,6 +45,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 				});
 
@@ -61,6 +67,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 				});
 
@@ -77,10 +86,16 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 				});
 
@@ -94,9 +109,12 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 					return runner.runTest(
-						"document.body.innerHTML.includes(`<h1>Hello World</h1>`)",
+						"assert.include(document.body.innerHTML,`<h1>Hello World</h1>`)",
 					);
 				}, source);
 
@@ -108,6 +126,9 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 					return runner.runTest("throw new Error('test error')");
 				});
@@ -125,6 +146,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "worker",
+						code: {
+							contents: "",
+						},
 					});
 				});
 
@@ -138,6 +162,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 				});
 				expect(await page.$("iframe")).toBeTruthy();
@@ -146,6 +173,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "worker",
+						code: {
+							contents: "",
+						},
 					});
 				});
 				expect(await page.$("iframe")).toBeFalsy();
@@ -157,6 +187,9 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "worker",
+						code: {
+							contents: "",
+						},
 					});
 					return runner.runTest(
 						"if(getFive() !== 5) { throw Error('getFive() should return 5') }",
@@ -173,6 +206,9 @@ describe("Test Runner", () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
 						type: "frame",
+						code: {
+							contents: "",
+						},
 					});
 
 					const otherFrame = document.createElement("iframe");

@@ -19,12 +19,14 @@ class FCCSandbox {
 	async createTestRunner({
 		source,
 		type,
+		code,
 		assetPath,
 	}: {
 		source: string;
 		type: "frame" | "worker";
 		// TODO: can we avoid using `assetPath` and use `import.meta.url` instead?
 		assetPath?: string;
+		code: { contents: string };
 	}) {
 		this.#testRunner?.dispose();
 		if (type === "frame") {
@@ -40,7 +42,7 @@ class FCCSandbox {
 				script: "worker-test-evaluator.mjs",
 			});
 		}
-		await this.#testRunner.init();
+		await this.#testRunner.init({ code });
 
 		return this.#testRunner;
 	}

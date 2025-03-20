@@ -1,11 +1,18 @@
+/* @jest-environment jsdom */
+
 import { FrameTestEvaluator } from "../src/test-evaluators/frame-test-evaluator";
 
 describe("FrameTestEvaluator", () => {
 	let messenger: FrameTestEvaluator;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		messenger = new FrameTestEvaluator();
-		messenger.init();
+		await messenger.init({ code: {} });
+		jest.spyOn(console, "error").mockImplementation(jest.fn());
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
 	});
 
 	describe("runTest", () => {
@@ -32,7 +39,7 @@ describe("FrameTestEvaluator", () => {
 
 		it("should handle a test that throws an error with expected and actual values", async () => {
 			const test =
-				"let err = Error('test error'); err.expected = 'expected'; err.actual = 'actual'; throw err";
+				"throw new chai.AssertionError('test error', { expected: 'expected', actual: 'actual' })";
 
 			const result = await messenger.runTest(test);
 

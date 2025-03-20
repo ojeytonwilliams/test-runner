@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const webpack = require("webpack");
+
 module.exports = (env = {}) => {
 	const isDev = env.development;
 
@@ -33,7 +36,18 @@ module.exports = (env = {}) => {
 			],
 		},
 		resolve: {
+			fallback: {
+				// buffer: require.resolve("buffer"),
+				util: require.resolve("util"),
+				stream: false,
+				process: require.resolve("process/browser.js"),
+			},
 			extensions: [".ts", ".js"],
 		},
+		plugins: [
+			new webpack.ProvidePlugin({
+				process: "process/browser",
+			}),
+		],
 	};
 };
