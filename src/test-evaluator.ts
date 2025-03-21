@@ -1,10 +1,16 @@
-// This runs in an iframe and listens for messages from the parent window
+interface Pass {
+	pass: true;
+}
 
-import { TestEvaluator } from "./toy-test-evaluator";
+export interface Fail {
+	message: string;
+	stack: string;
+	expected?: string;
+	actual?: string;
+}
 
-const messenger = new TestEvaluator();
-messenger.init();
-
-self.onmessage = async function (e) {
-	messenger.handleMessage(e);
-};
+export interface TestEvaluator {
+	init(): Promise<void>;
+	runTest(test: string): Promise<Pass | Fail>;
+	handleMessage(e: MessageEvent): void;
+}

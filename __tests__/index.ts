@@ -25,7 +25,10 @@ describe("Test Runner", () => {
 			it("should be instantiated by createTestRunner", async () => {
 				const before = await page.$("iframe");
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({ source: "" });
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
 				});
 
 				const after = await page.$("iframe");
@@ -36,7 +39,10 @@ describe("Test Runner", () => {
 
 			it("should be disposable", async () => {
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({ source: "" });
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
 				});
 
 				const before = await page.$("iframe");
@@ -50,19 +56,12 @@ describe("Test Runner", () => {
 				expect(after).toBeFalsy();
 			});
 
-			it("should remove existing iframe before creating a new one", async () => {
+			it("should create a sandboxed iframe, when type is 'frame'", async () => {
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({ source: "" });
-					await window.FCCSandbox.createTestRunner({ source: "" });
-				});
-
-				const iframes = await page.$$("iframe");
-				expect(iframes.length).toBe(1);
-			});
-
-			it("should create a sandboxed iframe", async () => {
-				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({ source: "" });
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
 				});
 
 				const iframe = await page.$("iframe");
@@ -73,10 +72,29 @@ describe("Test Runner", () => {
 				expect(sandbox).toBe("allow-scripts");
 			});
 
+			it("should remove existing iframe before creating a new one", async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
+				});
+
+				const iframes = await page.$$("iframe");
+				expect(iframes.length).toBe(1);
+			});
+
 			it("should run tests against the sandboxed iframe", async () => {
 				const source = "<body><h1>Hello World</h1></body>";
 				const result = await page.evaluate(async (source) => {
-					const runner = await window.FCCSandbox.createTestRunner({ source });
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+					});
 					return runner.runTest(
 						"document.body.innerHTML.includes(`<h1>Hello World</h1>`)",
 					);
@@ -89,6 +107,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source: "",
+						type: "frame",
 					});
 					return runner.runTest("throw new Error('test error')");
 				});
@@ -98,13 +117,60 @@ describe("Test Runner", () => {
 					stack: expect.stringMatching("Error: test error"),
 				});
 			});
+
+			it('should not create a frame when type is "worker"', async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "worker",
+					});
+				});
+
+				const frame = await page.$("iframe");
+
+				expect(frame).toBeFalsy();
+			});
+
+			it("should remove any existing iframes when creating a worker", async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+					});
+				});
+				expect(await page.$("iframe")).toBeTruthy();
+
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "worker",
+					});
+				});
+				expect(await page.$("iframe")).toBeFalsy();
+			});
+
+			it("should run tests against the worker", async () => {
+				const source = "const getFive = () => 5;";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "worker",
+					});
+					return runner.runTest(
+						"if(getFive() !== 5) { throw Error('getFive() should return 5') }",
+					);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
-		describe("TestMessenger", () => {
+		describe("iframe evaluators", () => {
 			it("should ignore messages that do not come from the parent window", async () => {
 				const result = await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
+						type: "frame",
 					});
 
 					const otherFrame = document.createElement("iframe");

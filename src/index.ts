@@ -1,4 +1,4 @@
-import { TestRunner } from "./test-runner";
+import { FrameTestRunner, WorkerTestRunner } from "./test-runner";
 
 declare global {
 	interface Window {
@@ -7,7 +7,7 @@ declare global {
 }
 
 class FCCSandbox {
-	#testRunner: TestRunner | null;
+	#testRunner: FrameTestRunner | WorkerTestRunner | null;
 
 	constructor() {
 		this.#testRunner = null;
@@ -16,9 +16,19 @@ class FCCSandbox {
 		return this.#testRunner;
 	}
 
-	async createTestRunner({ source }: { source: string }) {
+	async createTestRunner({
+		source,
+		type,
+	}: {
+		source: string;
+		type: "frame" | "worker";
+	}) {
 		this.#testRunner?.dispose();
-		this.#testRunner = new TestRunner({ source });
+		if (type === "frame") {
+			this.#testRunner = new FrameTestRunner({ source });
+		} else {
+			this.#testRunner = new WorkerTestRunner({ source });
+		}
 		await this.#testRunner.init();
 
 		return this.#testRunner;

@@ -1,10 +1,10 @@
-import { TestEvaluator } from "../src/toy-test-evaluator";
+import { FrameTestEvaluator } from "../src/frame-test-evaluator";
 
-describe("Messenger", () => {
-	let messenger: TestEvaluator;
+describe("FrameTestEvaluator", () => {
+	let messenger: FrameTestEvaluator;
 
 	beforeEach(() => {
-		messenger = new TestEvaluator();
+		messenger = new FrameTestEvaluator();
 		messenger.init();
 	});
 
