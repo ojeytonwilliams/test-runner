@@ -28,12 +28,14 @@ export class FrameTestEvaluator implements TestEvaluator {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
 			self.parent.postMessage({ type: "result", value: result }, "*");
+		} else if (e.data.type === "init") {
+			await this.init();
+			self.parent.postMessage({ type: "ready" }, "*");
 		}
 	}
 }
 
 const messenger = new FrameTestEvaluator();
-messenger.init();
 
 onmessage = async function (e) {
 	if (e.source !== self.parent) {

@@ -31,13 +31,15 @@ export class WorkerTestEvaluator implements TestEvaluator {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
 			postMessage({ type: "result", value: result });
+		} else if (e.data.type === "init") {
+			await this.init();
+			postMessage({ type: "ready" });
 		}
 	}
 }
 
 const worker = new WorkerTestEvaluator();
-worker.init().then(() => {
-	onmessage = async function (e) {
-		worker.handleMessage(e);
-	};
-});
+
+onmessage = async function (e) {
+	worker.handleMessage(e);
+};

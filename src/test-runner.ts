@@ -29,8 +29,25 @@ export class FrameTestRunner implements Runner {
 				resolve(true);
 			});
 		});
+
 		document.body.appendChild(this.#iframe);
 		await isReady;
+
+		const isInitialized = new Promise((resolve) => {
+			window.addEventListener("message", (event) => {
+				if (
+					event.origin !== "null" ||
+					event.source !== this.#iframe.contentWindow
+				) {
+					return;
+				}
+				if (event.data.type === "ready") resolve(true);
+			});
+		});
+
+		this.#iframe.contentWindow?.postMessage({ type: "init" }, "*");
+
+		await isInitialized;
 	}
 
 	runTest(test: string) {
@@ -65,12 +82,20 @@ export class WorkerTestRunner implements Runner {
 		this.#source = source;
 	}
 
-	init() {
-		return Promise.resolve();
+	async init() {
+		const isInitialized = new Promise((resolve) => {
+			this.#worker.onmessage = (event) => {
+				if (event.data.type === "ready") resolve(true);
+			};
+		});
+
+		this.#worker.postMessage({ type: "init" });
+		await isInitialized;
 	}
 
 	runTest(test: string) {
 		const result = new Promise((resolve) => {
+			// TODO: differentiate between messages
 			this.#worker.onmessage = (event) => {
 				resolve(event.data.value);
 			};
