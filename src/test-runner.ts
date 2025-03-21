@@ -28,8 +28,13 @@ export class TestRunner {
 
 	runTest(test: string) {
 		const result = new Promise((resolve) => {
-			window.addEventListener("message", function handler(event) {
-				// TODO: check source matches iframe and that type is what we expect and then remove listener
+			window.addEventListener("message", (event) => {
+				if (
+					event.origin !== "null" ||
+					event.source !== this.#iframe.contentWindow
+				) {
+					return;
+				}
 				resolve(event.data.value);
 			});
 		});
