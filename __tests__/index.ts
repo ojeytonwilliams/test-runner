@@ -73,20 +73,6 @@ describe("Test Runner", () => {
 				expect(sandbox).toBe("allow-scripts");
 			});
 
-			it("should have an init method that prepares the runner and resolves when it is ready", async () => {
-				const isReady = await page.evaluate(() => {
-					const runner = new window.FCCSandbox.TestRunner({ source: "" });
-					const isReady = runner.init();
-					if (typeof isReady !== "object") {
-						throw new Error("isReady is not a promise");
-					}
-
-					return isReady;
-				});
-
-				expect(isReady).toBe(undefined);
-			});
-
 			it("should run tests against the sandboxed iframe", async () => {
 				const source = "<body><h1>Hello World</h1></body>";
 				const result = await page.evaluate(async (source) => {

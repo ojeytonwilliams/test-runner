@@ -8,7 +8,6 @@ declare global {
 
 class FCCSandbox {
 	#testRunner: TestRunner | null;
-	TestRunner = TestRunner;
 
 	constructor() {
 		this.#testRunner = null;
