@@ -2,7 +2,7 @@ function createTestFrame({ source }: { source: string }) {
 	const iframe = document.createElement("iframe");
 	iframe.sandbox.add("allow-scripts");
 	// TODO: can we append the script via appendChild?
-	iframe.srcdoc = source + "<script src='../dist/test-messenger.mjs'></script>";
+	iframe.srcdoc = source + "<script src='../dist/test-evaluator.mjs'></script>";
 	iframe.id = "test-frame";
 
 	return iframe;

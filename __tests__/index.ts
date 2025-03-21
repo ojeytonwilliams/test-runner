@@ -96,7 +96,21 @@ describe("Test Runner", () => {
 					);
 				}, source);
 
-				expect(result).toBe(true);
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should handle tests that throw errors", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source: "",
+					});
+					return runner.runTest("throw new Error('test error')");
+				});
+
+				expect(result).toEqual({
+					message: "test error",
+					stack: expect.stringMatching("Error: test error"),
+				});
 			});
 		});
 
