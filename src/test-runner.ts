@@ -3,6 +3,7 @@ function createTestFrame({ source }: { source: string }) {
 	iframe.sandbox.add("allow-scripts");
 	// TODO: can we append the script via appendChild?
 	iframe.srcdoc = source + "<script src='../dist/test-messenger.mjs'></script>";
+	iframe.id = "test-frame";
 
 	return iframe;
 }

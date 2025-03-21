@@ -99,5 +99,35 @@ describe("Test Runner", () => {
 				expect(result).toBe(true);
 			});
 		});
+
+		describe("TestMessenger", () => {
+			it("should ignore messages that do not come from the parent window", async () => {
+				const result = await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+					});
+
+					const otherFrame = document.createElement("iframe");
+					// post a message from a different window
+					otherFrame.srcdoc = `<script>let frame = window.parent.document.getElementById('test-frame').contentWindow.postMessage({ type: "test", value: "document.body.innerHTML.includes('<h1>Hello World</h1>')" }, "*");
+						 </script>`;
+
+					// wait for a message from otherFrame
+					const awaitMessage = new Promise((resolve, reject) => {
+						setTimeout(() => {
+							resolve("done");
+						}, 100);
+						window.addEventListener("message", function handler() {
+							reject(Error("Should not have received a message"));
+						});
+					});
+					document.body.appendChild(otherFrame);
+
+					return await awaitMessage;
+				});
+
+				expect(result).toBe("done");
+			});
+		});
 	});
 });
