@@ -1,9 +1,15 @@
-function createTestFrame({ source }: { source: string }) {
+function createTestFrame({
+	source,
+	assetPath,
+}: {
+	source: string;
+	assetPath: string;
+}) {
 	const iframe = document.createElement("iframe");
 	iframe.sandbox.add("allow-scripts");
 	// TODO: can we append the script via appendChild?
-	iframe.srcdoc =
-		source + "<script src='../dist/frame-test-evaluator.mjs'></script>";
+	const scriptUrl = assetPath + "frame-test-evaluator.mjs";
+	iframe.srcdoc = source + `<script src='${scriptUrl}'></script>`;
 	iframe.id = "test-frame";
 
 	return iframe;
@@ -15,11 +21,28 @@ interface Runner {
 	dispose(): void;
 }
 
+const getFullAssetPath = (assetPath = "/dist/") => {
+	const isAbsolute = assetPath.startsWith("/");
+	const hasTrailingSlash = assetPath.endsWith("/");
+	if (!isAbsolute) {
+		assetPath = "/" + assetPath;
+	}
+	if (!hasTrailingSlash) {
+		assetPath += "/";
+	}
+	return assetPath;
+};
+
 export class FrameTestRunner implements Runner {
 	#iframe: HTMLIFrameElement;
 
-	constructor({ source }: { source: string }) {
-		this.#iframe = createTestFrame({ source });
+	constructor(args: { source: string; assetPath?: string }) {
+		const source = args.source;
+
+		this.#iframe = createTestFrame({
+			source,
+			assetPath: getFullAssetPath(args.assetPath),
+		});
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
@@ -77,8 +100,9 @@ export class WorkerTestRunner implements Runner {
 	#worker: Worker;
 	#source: string;
 
-	constructor({ source }: { source: string }) {
-		this.#worker = new Worker("../dist/worker-test-evaluator.mjs");
+	constructor({ source, assetPath }: { source: string; assetPath?: string }) {
+		const scriptUrl = getFullAssetPath(assetPath) + "worker-test-evaluator.mjs";
+		this.#worker = new Worker(scriptUrl);
 		this.#source = source;
 	}
 
