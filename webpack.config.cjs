@@ -11,7 +11,8 @@ module.exports = (env = {}) => {
 		},
 		output: {
 			filename: "[name].mjs",
-			path: __dirname + "/dist",
+			// during testing, we need the files to be available for the test server:
+			path: isDev ? __dirname + "/__fixtures__/dist" : __dirname + "/dist",
 		},
 		module: {
 			rules: [
