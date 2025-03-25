@@ -23,8 +23,10 @@ describe("FrameTestEvaluator", () => {
 			const result = await messenger.runTest(test);
 
 			expect(result).toStrictEqual({
-				message: "test error",
-				stack: expect.stringMatching("Error: test error"),
+				err: {
+					message: "test error",
+					stack: expect.stringMatching("Error: test error"),
+				},
 			});
 		});
 
@@ -35,10 +37,12 @@ describe("FrameTestEvaluator", () => {
 			const result = await messenger.runTest(test);
 
 			expect(result).toStrictEqual({
-				message: "test error",
-				stack: expect.stringMatching("Error: test error"),
-				expected: "expected",
-				actual: "actual",
+				err: {
+					message: "test error",
+					stack: expect.stringMatching("Error: test error"),
+					expected: "expected",
+					actual: "actual",
+				},
 			});
 		});
 	});

@@ -3,10 +3,12 @@ interface Pass {
 }
 
 export interface Fail {
-	message: string;
-	stack: string;
-	expected?: string;
-	actual?: string;
+	err: {
+		message: string;
+		stack: string;
+		expected?: string;
+		actual?: string;
+	};
 }
 
 export interface TestEvaluator {

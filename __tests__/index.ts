@@ -113,8 +113,10 @@ describe("Test Runner", () => {
 				});
 
 				expect(result).toEqual({
-					message: "test error",
-					stack: expect.stringMatching("Error: test error"),
+					err: {
+						message: "test error",
+						stack: expect.stringMatching("Error: test error"),
+					},
 				});
 			});
 

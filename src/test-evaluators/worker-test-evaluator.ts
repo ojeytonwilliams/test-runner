@@ -10,12 +10,14 @@ export class WorkerTestEvaluator implements TestEvaluator {
 				await eval(test);
 				return { pass: true };
 			} catch (e: unknown) {
-				const error = e as Fail;
+				const error = e as Fail["err"];
 				return {
-					message: error.message,
-					stack: error.stack,
-					...(error.expected && { expected: error.expected }),
-					...(error.actual && { actual: error.actual }),
+					err: {
+						message: error.message,
+						stack: error.stack,
+						...(error.expected && { expected: error.expected }),
+						...(error.actual && { actual: error.actual }),
+					},
 				};
 			}
 		};
