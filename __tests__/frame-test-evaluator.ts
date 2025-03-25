@@ -1,4 +1,4 @@
-import { FrameTestEvaluator } from "../src/frame-test-evaluator";
+import { FrameTestEvaluator } from "../src/test-evaluators/frame-test-evaluator";
 
 describe("FrameTestEvaluator", () => {
 	let messenger: FrameTestEvaluator;

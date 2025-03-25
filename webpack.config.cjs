@@ -6,8 +6,8 @@ module.exports = (env = {}) => {
 		cache: isDev ? { type: "filesystem" } : false,
 		entry: {
 			index: "./src/index.ts",
-			"frame-test-evaluator": "./src/frame-test-evaluator.ts",
-			"worker-test-evaluator": "./src/worker-test-evaluator.ts",
+			"frame-test-evaluator": "./src/test-evaluators/frame-test-evaluator.ts",
+			"worker-test-evaluator": "./src/test-evaluators/worker-test-evaluator.ts",
 		},
 		output: {
 			filename: "[name].mjs",
