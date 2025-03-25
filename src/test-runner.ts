@@ -1,20 +1,3 @@
-function createTestFrame({
-	source,
-	assetPath,
-}: {
-	source: string;
-	assetPath: string;
-}) {
-	const iframe = document.createElement("iframe");
-	iframe.sandbox.add("allow-scripts");
-	// TODO: can we append the script via appendChild?
-	const scriptUrl = assetPath + "frame-test-evaluator.mjs";
-	iframe.srcdoc = source + `<script src='${scriptUrl}'></script>`;
-	iframe.id = "test-frame";
-
-	return iframe;
-}
-
 interface Runner {
 	init(): Promise<void>;
 	runTest(test: string): Promise<unknown>;
@@ -33,16 +16,35 @@ const getFullAssetPath = (assetPath = "/dist/") => {
 	return assetPath;
 };
 
+type RunnerConfig = {
+	source: string;
+	assetPath?: string;
+	script: string;
+};
+
 export class FrameTestRunner implements Runner {
 	#iframe: HTMLIFrameElement;
+	#createTestFrame({
+		source,
+		assetPath,
+		script,
+	}: {
+		source: string;
+		assetPath?: string;
+		script: string;
+	}) {
+		const iframe = document.createElement("iframe");
+		iframe.sandbox.add("allow-scripts");
+		// TODO: can we append the script via appendChild?
+		const scriptUrl = getFullAssetPath(assetPath) + script;
+		iframe.srcdoc = source + `<script src='${scriptUrl}'></script>`;
+		iframe.id = "test-frame";
 
-	constructor(args: { source: string; assetPath?: string }) {
-		const source = args.source;
+		return iframe;
+	}
 
-		this.#iframe = createTestFrame({
-			source,
-			assetPath: getFullAssetPath(args.assetPath),
-		});
+	constructor(config: RunnerConfig) {
+		this.#iframe = this.#createTestFrame(config);
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
@@ -99,11 +101,14 @@ export class FrameTestRunner implements Runner {
 export class WorkerTestRunner implements Runner {
 	#worker: Worker;
 	#source: string;
+	#createTestWorker({ assetPath, script }: RunnerConfig) {
+		const scriptUrl = getFullAssetPath(assetPath) + script;
+		return new Worker(scriptUrl);
+	}
 
-	constructor({ source, assetPath }: { source: string; assetPath?: string }) {
-		const scriptUrl = getFullAssetPath(assetPath) + "worker-test-evaluator.mjs";
-		this.#worker = new Worker(scriptUrl);
-		this.#source = source;
+	constructor(config: RunnerConfig) {
+		this.#source = config.source;
+		this.#worker = this.#createTestWorker(config);
 	}
 
 	async init() {

@@ -28,9 +28,17 @@ class FCCSandbox {
 	}) {
 		this.#testRunner?.dispose();
 		if (type === "frame") {
-			this.#testRunner = new FrameTestRunner({ source, assetPath });
+			this.#testRunner = new FrameTestRunner({
+				source,
+				assetPath,
+				script: "frame-test-evaluator.mjs",
+			});
 		} else {
-			this.#testRunner = new WorkerTestRunner({ source, assetPath });
+			this.#testRunner = new WorkerTestRunner({
+				source,
+				assetPath,
+				script: "worker-test-evaluator.mjs",
+			});
 		}
 		await this.#testRunner.init();
 
