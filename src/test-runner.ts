@@ -16,23 +16,15 @@ const getFullAssetPath = (assetPath = "/dist/") => {
 	return assetPath;
 };
 
-type RunnerConfig = {
+type Config = {
 	source: string;
 	assetPath?: string;
 	script: string;
 };
 
 export class FrameTestRunner implements Runner {
-	#iframe: HTMLIFrameElement;
-	#createTestFrame({
-		source,
-		assetPath,
-		script,
-	}: {
-		source: string;
-		assetPath?: string;
-		script: string;
-	}) {
+	#testEvaluator: HTMLIFrameElement;
+	#createTestEvaluator({ source, assetPath, script }: Config) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
 		// TODO: can we append the script via appendChild?
@@ -43,26 +35,26 @@ export class FrameTestRunner implements Runner {
 		return iframe;
 	}
 
-	constructor(config: RunnerConfig) {
-		this.#iframe = this.#createTestFrame(config);
+	constructor(config: Config) {
+		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
 	async init() {
 		const isReady = new Promise((resolve) => {
-			this.#iframe.addEventListener("load", () => {
+			this.#testEvaluator.addEventListener("load", () => {
 				resolve(true);
 			});
 		});
 
-		document.body.appendChild(this.#iframe);
+		document.body.appendChild(this.#testEvaluator);
 		await isReady;
 
 		const isInitialized = new Promise((resolve) => {
 			window.addEventListener("message", (event) => {
 				if (
 					event.origin !== "null" ||
-					event.source !== this.#iframe.contentWindow
+					event.source !== this.#testEvaluator.contentWindow
 				) {
 					return;
 				}
@@ -70,7 +62,7 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#iframe.contentWindow?.postMessage({ type: "init" }, "*");
+		this.#testEvaluator.contentWindow?.postMessage({ type: "init" }, "*");
 
 		await isInitialized;
 	}
@@ -80,7 +72,7 @@ export class FrameTestRunner implements Runner {
 			window.addEventListener("message", (event) => {
 				if (
 					event.origin !== "null" ||
-					event.source !== this.#iframe.contentWindow
+					event.source !== this.#testEvaluator.contentWindow
 				) {
 					return;
 				}
@@ -88,49 +80,52 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#iframe.contentWindow?.postMessage({ type: "test", value: test }, "*");
+		this.#testEvaluator.contentWindow?.postMessage(
+			{ type: "test", value: test },
+			"*",
+		);
 
 		return result;
 	}
 
 	dispose() {
-		this.#iframe.remove();
+		this.#testEvaluator.remove();
 	}
 }
 
 export class WorkerTestRunner implements Runner {
-	#worker: Worker;
+	#testEvaluator: Worker;
 	#source: string;
-	#createTestWorker({ assetPath, script }: RunnerConfig) {
+	#createTestEvaluator({ assetPath, script }: Config) {
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		return new Worker(scriptUrl);
 	}
 
-	constructor(config: RunnerConfig) {
+	constructor(config: Config) {
 		this.#source = config.source;
-		this.#worker = this.#createTestWorker(config);
+		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
 	async init() {
 		const isInitialized = new Promise((resolve) => {
-			this.#worker.onmessage = (event) => {
+			this.#testEvaluator.onmessage = (event) => {
 				if (event.data.type === "ready") resolve(true);
 			};
 		});
 
-		this.#worker.postMessage({ type: "init" });
+		this.#testEvaluator.postMessage({ type: "init" });
 		await isInitialized;
 	}
 
 	runTest(test: string) {
 		const result = new Promise((resolve) => {
 			// TODO: differentiate between messages
-			this.#worker.onmessage = (event) => {
+			this.#testEvaluator.onmessage = (event) => {
 				resolve(event.data.value);
 			};
 		});
 
-		this.#worker.postMessage({
+		this.#testEvaluator.postMessage({
 			type: "test",
 			value: `${this.#source}; ${test}`,
 		});
@@ -139,6 +134,6 @@ export class WorkerTestRunner implements Runner {
 	}
 
 	dispose() {
-		this.#worker.terminate();
+		this.#testEvaluator.terminate();
 	}
 }
