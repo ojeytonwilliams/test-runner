@@ -2,6 +2,12 @@
 
 import { FrameTestEvaluator } from "../src/test-evaluators/frame-test-evaluator";
 
+// This is a limited reset, but should be enough if we only add or remove
+// elements.
+const resetDocument = () => {
+	document.body.innerHTML = "";
+};
+
 describe("FrameTestEvaluator", () => {
 	let messenger: FrameTestEvaluator;
 
@@ -51,6 +57,17 @@ describe("FrameTestEvaluator", () => {
 					actual: "actual",
 				},
 			});
+		});
+
+		it("should test against the enclosing document", async () => {
+			resetDocument();
+			document.body.appendChild(document.createElement("div"));
+			document.body.appendChild(document.createElement("div"));
+
+			const test = "assert.equal(document.querySelectorAll('div').length, 2)";
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({ pass: true });
 		});
 	});
 });
