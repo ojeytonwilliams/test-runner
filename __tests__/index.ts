@@ -103,24 +103,6 @@ describe("Test Runner", () => {
 				expect(iframes.length).toBe(1);
 			});
 
-			it("should run tests against the sandboxed iframe", async () => {
-				const source = "<body><h1>Hello World</h1></body>";
-				const result = await page.evaluate(async (source) => {
-					const runner = await window.FCCSandbox.createTestRunner({
-						source,
-						type: "frame",
-						code: {
-							contents: "",
-						},
-					});
-					return runner.runTest(
-						"assert.include(document.body.innerHTML,`<h1>Hello World</h1>`)",
-					);
-				}, source);
-
-				expect(result).toEqual({ pass: true });
-			});
-
 			it("should handle tests that throw errors", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
@@ -231,6 +213,50 @@ describe("Test Runner", () => {
 				});
 
 				expect(result).toBe("done");
+			});
+
+			it("should run tests against the sandboxed iframe", async () => {
+				const source = "<body><h1>Hello World</h1></body>";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return runner.runTest(
+						"assert.include(document.body.innerHTML,`<h1>Hello World</h1>`)",
+					);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should have access to variables defined in the iframe", async () => {
+				const source =
+					"<body><h1>Hello World</h1><script>const someGlobal = 'test'</script></body>";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return runner.runTest("assert.equal(someGlobal, 'tes')");
+				}, source);
+
+				expect(result).toEqual({
+					err: {
+						actual: "test",
+						expected: "tes",
+						message: "expected 'test' to equal 'tes'",
+						stack: expect.stringMatching(
+							"AssertionError: expected 'test' to equal 'tes'",
+						),
+					},
+				});
 			});
 		});
 	});

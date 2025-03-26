@@ -9,9 +9,9 @@ interface InitTestFrameArg {
 		editableContents?: string;
 		original?: { [id: string]: string | null };
 	};
-	getUserInput?: (fileName: string) => string;
-	loadEnzyme?: () => void;
+	loadEnzyme?: boolean;
 }
+
 type FrameWindow = Window &
 	typeof globalThis & {
 		$: typeof jQuery;
@@ -24,8 +24,8 @@ export class FrameTestEvaluator implements TestEvaluator {
 	async init(opts: InitTestFrameArg) {
 		const codeObj = opts.code;
 
-		const code = (codeObj.contents || "").slice();
 		/* eslint-disable @typescript-eslint/no-unused-vars */
+		const code = (codeObj.contents || "").slice();
 		const __file = (id?: string) => {
 			if (id && codeObj.original) {
 				return codeObj.original[id];
@@ -45,9 +45,6 @@ export class FrameTestEvaluator implements TestEvaluator {
 			document.body.removeChild(div);
 			return out;
 		};
-
-		const getUserInput = opts.getUserInput ?? (() => code);
-		const loadEnzyme = opts.loadEnzyme;
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
 		// Fake Deep Equal dependency
@@ -81,7 +78,7 @@ export class FrameTestEvaluator implements TestEvaluator {
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		let Enzyme;
-		if (loadEnzyme) {
+		if (opts.loadEnzyme) {
 			/* eslint-disable prefer-const */
 			let Adapter16;
 
@@ -121,7 +118,7 @@ export class FrameTestEvaluator implements TestEvaluator {
 				);
 				const test = await testPromise;
 				if (typeof test === "function") {
-					await test(getUserInput);
+					await test();
 				}
 				return { pass: true };
 			} catch (err) {
