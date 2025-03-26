@@ -1,3 +1,6 @@
+import { InitTestFrameOptions } from "./test-evaluators/frame-test-evaluator";
+import { InitWorkerOptions } from "./test-evaluators/worker-test-evaluator";
+
 interface Runner {
 	init(opts?: InitOptions): Promise<void>;
 	runTest(test: string): Promise<unknown>;
@@ -47,7 +50,7 @@ export class FrameTestRunner implements Runner {
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
-	async init(opts?: InitOptions) {
+	async init(opts: InitTestFrameOptions) {
 		const isReady = new Promise((resolve) => {
 			this.#testEvaluator.addEventListener("load", () => {
 				resolve(true);
@@ -121,14 +124,14 @@ export class WorkerTestRunner implements Runner {
 		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
-	async init() {
+	async init(opts: InitWorkerOptions) {
 		const isInitialized = new Promise((resolve) => {
 			this.#testEvaluator.onmessage = (event) => {
 				if (event.data.type === "ready") resolve(true);
 			};
 		});
 
-		this.#testEvaluator.postMessage({ type: "init" });
+		this.#testEvaluator.postMessage({ type: "init", value: opts });
 		await isInitialized;
 	}
 

@@ -162,24 +162,6 @@ describe("Test Runner", () => {
 				});
 				expect(await page.$("iframe")).toBeFalsy();
 			});
-
-			it("should run tests against the worker", async () => {
-				const source = "const getFive = () => 5;";
-				const result = await page.evaluate(async (source) => {
-					const runner = await window.FCCSandbox.createTestRunner({
-						source,
-						type: "worker",
-						code: {
-							contents: "",
-						},
-					});
-					return runner.runTest(
-						"if(getFive() !== 5) { throw Error('getFive() should return 5') }",
-					);
-				}, source);
-
-				expect(result).toEqual({ pass: true });
-			});
 		});
 
 		describe("iframe evaluators", () => {
@@ -257,6 +239,26 @@ describe("Test Runner", () => {
 						),
 					},
 				});
+			});
+		});
+
+		describe("worker evaluators", () => {
+			it("should run tests after evaluating the code contents supplied to the runner", async () => {
+				const contents = "const getFive = () => 5;";
+				const result = await page.evaluate(async (contents) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "worker",
+						code: {
+							contents,
+						},
+					});
+					return runner.runTest(
+						"if(getFive() !== 5) { throw Error('getFive() should return 5') }",
+					);
+				}, contents);
+
+				expect(result).toEqual({ pass: true });
 			});
 		});
 	});

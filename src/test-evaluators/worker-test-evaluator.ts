@@ -1,13 +1,34 @@
+import { assert } from "chai";
+
 import type { TestEvaluator, Fail } from "./test-evaluator";
+declare global {
+	interface WorkerGlobalScope {
+		assert: typeof assert;
+	}
+}
+
+// For TS to know that this file is to be used in a worker (and only in a
+// worker), we need to cast self.
+const ctx = self as unknown as WorkerGlobalScope & typeof globalThis;
+// assert has to be added to the global scope or it will get eliminated as dead
+// code.
+ctx.assert = assert;
+
+export interface InitWorkerOptions {
+	code: {
+		contents?: string;
+		editableContents?: string;
+	};
+}
 
 // TODO: currently this is almost identical to FrameTestEvaluator, can we make
 // it more DRY? Don't attempt until they're both more fleshed out.
 export class WorkerTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
-	init() {
+	init(opts: InitWorkerOptions) {
 		this.#runTest = async (test) => {
 			try {
-				await eval(test);
+				await eval(`${opts.code.contents};${test}`);
 				return { pass: true };
 			} catch (e: unknown) {
 				const error = e as Fail["err"];
@@ -34,7 +55,7 @@ export class WorkerTestEvaluator implements TestEvaluator {
 			const result = await this.#runTest!(e.data.value);
 			postMessage({ type: "result", value: result });
 		} else if (e.data.type === "init") {
-			await this.init();
+			await this.init(e.data.value);
 			postMessage({ type: "ready" });
 		}
 	}
@@ -42,6 +63,6 @@ export class WorkerTestEvaluator implements TestEvaluator {
 
 const worker = new WorkerTestEvaluator();
 
-onmessage = async function (e) {
+ctx.onmessage = async function (e) {
 	worker.handleMessage(e);
 };

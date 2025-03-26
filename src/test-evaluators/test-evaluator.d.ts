@@ -12,7 +12,7 @@ export interface Fail {
 }
 
 export interface TestEvaluator {
-	init(opts?: unknown): Promise<void>;
+	init(opts: unknown): Promise<void>;
 	runTest(test: string): Promise<Pass | Fail>;
 	handleMessage(e: MessageEvent): void;
 }

@@ -3,7 +3,7 @@ import * as helpers from "@freecodecamp/curriculum-helpers";
 
 import type { TestEvaluator, Fail } from "./test-evaluator";
 
-interface InitTestFrameArg {
+export interface InitTestFrameOptions {
 	code: {
 		contents?: string;
 		editableContents?: string;
@@ -20,7 +20,7 @@ type FrameWindow = Window &
 
 export class FrameTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
-	async init(opts: InitTestFrameArg) {
+	async init(opts: InitTestFrameOptions) {
 		const codeObj = opts.code;
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
