@@ -26,7 +26,6 @@ type InitOptions = {
 	code: {
 		contents?: string;
 		editableContents?: string;
-		original?: { [id: string]: string | null };
 	};
 };
 

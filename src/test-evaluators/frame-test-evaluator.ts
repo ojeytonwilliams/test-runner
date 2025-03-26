@@ -7,7 +7,6 @@ interface InitTestFrameArg {
 	code: {
 		contents?: string;
 		editableContents?: string;
-		original?: { [id: string]: string | null };
 	};
 	loadEnzyme?: boolean;
 }
@@ -26,13 +25,7 @@ export class FrameTestEvaluator implements TestEvaluator {
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
 		const code = (codeObj.contents || "").slice();
-		const __file = (id?: string) => {
-			if (id && codeObj.original) {
-				return codeObj.original[id];
-			} else {
-				return codeObj;
-			}
-		};
+
 		const editableContents = (codeObj.editableContents || "").slice();
 		// __testEditable allows test authors to run tests against a transitory dom
 		// element built using only the code in the editable region.
