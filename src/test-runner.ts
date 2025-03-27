@@ -1,4 +1,5 @@
 import type { InitTestFrameOptions } from "./test-evaluators/frame-test-evaluator";
+import type { InitEvent, TestEvent } from "./test-evaluators/test-evaluator";
 import type { InitWorkerOptions } from "./test-evaluators/worker-test-evaluator";
 
 interface Runner {
@@ -75,15 +76,11 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#testEvaluator.contentWindow?.postMessage(
-			{
-				type: "init",
-				value: {
-					code: opts?.code,
-				},
-			},
-			"*",
-		);
+		const msg: InitEvent<InitTestFrameOptions>["data"] = {
+			type: "init",
+			value: opts,
+		};
+		this.#testEvaluator.contentWindow?.postMessage(msg, "*");
 
 		await isInitialized;
 	}
@@ -101,10 +98,8 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#testEvaluator.contentWindow?.postMessage(
-			{ type: "test", value: test },
-			"*",
-		);
+		const msg: TestEvent["data"] = { type: "test", value: test };
+		this.#testEvaluator.contentWindow?.postMessage(msg, "*");
 
 		return result;
 	}
@@ -134,7 +129,11 @@ export class WorkerTestRunner implements Runner {
 			};
 		});
 
-		this.#testEvaluator.postMessage({ type: "init", value: opts });
+		const msg: InitEvent<InitWorkerOptions>["data"] = {
+			type: "init",
+			value: opts,
+		};
+		this.#testEvaluator.postMessage(msg);
 		await isInitialized;
 	}
 
@@ -146,10 +145,11 @@ export class WorkerTestRunner implements Runner {
 			};
 		});
 
-		this.#testEvaluator.postMessage({
+		const msg: TestEvent["data"] = {
 			type: "test",
 			value: `${this.#source}; ${test}`,
-		});
+		};
+		this.#testEvaluator.postMessage(msg);
 
 		return result;
 	}

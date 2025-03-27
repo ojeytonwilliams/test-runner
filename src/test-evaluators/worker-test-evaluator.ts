@@ -6,6 +6,9 @@ import type {
 	InitEvent,
 	TestEvent,
 } from "./test-evaluator";
+import type { ResultEvent, ReadyEvent } from "../test-runner";
+
+const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
 	interface DedicatedWorkerGlobalScope {
 		assert: typeof assert;
@@ -60,10 +63,11 @@ export class WorkerTestEvaluator implements TestEvaluator {
 	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
-			postMessage({ type: "result", value: result });
+			const msg: ResultEvent["data"] = { type: "result", value: result };
+			postMessage(msg);
 		} else if (e.data.type === "init") {
 			await this.init(e.data.value);
-			postMessage({ type: "ready" });
+			postMessage(READY_MESSAGE);
 		}
 	}
 }

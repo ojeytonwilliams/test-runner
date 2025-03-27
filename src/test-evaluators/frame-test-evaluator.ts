@@ -8,6 +8,10 @@ import type {
 	InitEvent,
 } from "./test-evaluator";
 
+import type { ReadyEvent, ResultEvent } from "../test-runner";
+
+const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
+
 export interface InitTestFrameOptions {
 	code: {
 		contents?: string;
@@ -152,10 +156,11 @@ export class FrameTestEvaluator implements TestEvaluator {
 	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
-			self.parent.postMessage({ type: "result", value: result }, "*");
+			const msg: ResultEvent["data"] = { type: "result", value: result };
+			self.parent.postMessage(msg, "*");
 		} else if (e.data.type === "init") {
 			await this.init(e.data.value);
-			self.parent.postMessage({ type: "ready" }, "*");
+			self.parent.postMessage(READY_MESSAGE, "*");
 		}
 	}
 }
