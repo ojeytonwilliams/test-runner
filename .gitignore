@@ -135,6 +135,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# test build artifacts
+# build artifacts
 
 __fixtures__/dist
+packages/*/build

@@ -6,9 +6,9 @@ import type {
 	Fail,
 	TestEvent,
 	InitEvent,
-} from "./test-evaluator";
+} from "../../../types/test-evaluator";
 
-import type { ReadyEvent, ResultEvent } from "../test-runner";
+import type { ReadyEvent, ResultEvent } from "../../../types/test-runner";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 

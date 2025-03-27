@@ -1,16 +1,9 @@
 const webpack = require("webpack");
 
-module.exports = (env = {}) => {
-	const isDev = env.development;
-
+const commonConfig = (isDev) => {
 	return {
 		mode: isDev ? "development" : "production",
 		cache: isDev ? { type: "filesystem" } : false,
-		entry: {
-			index: "./src/index.ts",
-			"frame-test-evaluator": "./src/test-evaluators/frame-test-evaluator.ts",
-			"worker-test-evaluator": "./src/test-evaluators/worker-test-evaluator.ts",
-		},
 		output: {
 			filename: "[name].mjs",
 			// during testing, we need the files to be available for the test server:
@@ -24,9 +17,7 @@ module.exports = (env = {}) => {
 						{
 							loader: "ts-loader",
 							options: {
-								compilerOptions: {
-									noEmit: false,
-								},
+								projectReferences: true,
 							},
 						},
 					],
@@ -49,4 +40,34 @@ module.exports = (env = {}) => {
 			}),
 		],
 	};
+};
+
+// ts-loader doesn't seem to support multiple entry points, so we need to create
+// multiple configs
+const entryPoints = [
+	{
+		name: "index",
+		path: "./packages/main/src/index.ts",
+	},
+	{
+		name: "frame-test-evaluator",
+		path: "./packages/frame-evaluators/src/frame-test-evaluator.ts",
+	},
+	{
+		name: "worker-test-evaluator",
+		path: "./packages/workers/src/worker-test-evaluator.ts",
+	},
+];
+
+module.exports = (env = {}) => {
+	const isDev = env.development;
+
+	return entryPoints.map((entryPoint) => {
+		return {
+			...commonConfig(isDev),
+			entry: {
+				[entryPoint.name]: entryPoint.path,
+			},
+		};
+	});
 };

@@ -1,6 +1,10 @@
-import type { InitTestFrameOptions } from "./test-evaluators/frame-test-evaluator";
-import type { InitEvent, TestEvent } from "./test-evaluators/test-evaluator";
-import type { InitWorkerOptions } from "./test-evaluators/worker-test-evaluator";
+import type { ReadyEvent, ResultEvent } from "../../../types/test-runner";
+import type {
+	InitEvent,
+	TestEvent,
+	InitWorkerOptions,
+	InitTestFrameOptions,
+} from "../../../types/test-evaluator";
 
 interface Runner {
 	init(opts?: InitOptions): Promise<void>;
@@ -32,9 +36,6 @@ type InitOptions = {
 		editableContents?: string;
 	};
 };
-
-export type ReadyEvent = MessageEvent<{ type: "ready" }>;
-export type ResultEvent = MessageEvent<{ type: "result"; value: unknown }>;
 
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
