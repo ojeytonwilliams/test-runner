@@ -1,7 +1,12 @@
 import jQuery from "jquery";
 import * as helpers from "@freecodecamp/curriculum-helpers";
 
-import type { TestEvaluator, Fail } from "./test-evaluator";
+import type {
+	TestEvaluator,
+	Fail,
+	TestEvent,
+	InitEvent,
+} from "./test-evaluator";
 
 export interface InitTestFrameOptions {
 	code: {
@@ -111,6 +116,7 @@ export class FrameTestEvaluator implements TestEvaluator {
 				);
 				const test = await testPromise;
 				if (typeof test === "function") {
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 					await test();
 				}
 				return { pass: true };
@@ -141,7 +147,9 @@ export class FrameTestEvaluator implements TestEvaluator {
 		return await this.#runTest!(test);
 	}
 
-	async handleMessage(e: MessageEvent): Promise<void> {
+	async handleMessage(
+		e: TestEvent | InitEvent<InitTestFrameOptions>,
+	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
 			self.parent.postMessage({ type: "result", value: result }, "*");
@@ -154,9 +162,9 @@ export class FrameTestEvaluator implements TestEvaluator {
 
 const messenger = new FrameTestEvaluator();
 
-onmessage = async function (e) {
+onmessage = function (e: TestEvent | InitEvent<InitTestFrameOptions>) {
 	if (e.source !== self.parent) {
 		return;
 	}
-	messenger.handleMessage(e);
+	void messenger.handleMessage(e);
 };

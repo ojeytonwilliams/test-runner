@@ -11,8 +11,14 @@ export interface Fail {
 	};
 }
 
+export type TestEvent = MessageEvent<{ type: "test"; value: string }>;
+export type InitEvent<Data> = MessageEvent<{
+	type: "init";
+	value: Data;
+}>;
+
 export interface TestEvaluator {
 	init(opts: unknown): Promise<void>;
 	runTest(test: string): Promise<Pass | Fail>;
-	handleMessage(e: MessageEvent): void;
+	handleMessage(e: MessageEvent): Promise<void>;
 }

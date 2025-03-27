@@ -1,15 +1,20 @@
 import { assert } from "chai";
 
-import type { TestEvaluator, Fail } from "./test-evaluator";
+import type {
+	TestEvaluator,
+	Fail,
+	InitEvent,
+	TestEvent,
+} from "./test-evaluator";
 declare global {
-	interface WorkerGlobalScope {
+	interface DedicatedWorkerGlobalScope {
 		assert: typeof assert;
 	}
 }
 
 // For TS to know that this file is to be used in a worker (and only in a
 // worker), we need to cast self.
-const ctx = self as unknown as WorkerGlobalScope & typeof globalThis;
+const ctx = self as unknown as DedicatedWorkerGlobalScope;
 // assert has to be added to the global scope or it will get eliminated as dead
 // code.
 ctx.assert = assert;
@@ -50,7 +55,9 @@ export class WorkerTestEvaluator implements TestEvaluator {
 		return await this.#runTest!(test);
 	}
 
-	async handleMessage(e: MessageEvent): Promise<void> {
+	async handleMessage(
+		e: TestEvent | InitEvent<InitWorkerOptions>,
+	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
 			postMessage({ type: "result", value: result });
@@ -63,6 +70,6 @@ export class WorkerTestEvaluator implements TestEvaluator {
 
 const worker = new WorkerTestEvaluator();
 
-ctx.onmessage = async function (e) {
-	worker.handleMessage(e);
+ctx.onmessage = function (e: TestEvent | InitEvent<InitWorkerOptions>) {
+	void worker.handleMessage(e);
 };

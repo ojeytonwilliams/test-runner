@@ -38,6 +38,7 @@ describe("FrameTestEvaluator", () => {
 			expect(result).toStrictEqual({
 				err: {
 					message: "test error",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("Error: test error"),
 				},
 			});
@@ -52,6 +53,7 @@ describe("FrameTestEvaluator", () => {
 			expect(result).toStrictEqual({
 				err: {
 					message: "test error",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("Error: test error"),
 					expected: "expected",
 					actual: "actual",

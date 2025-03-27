@@ -32,6 +32,7 @@ describe("WorkerTestEvaluator", () => {
 			expect(result).toStrictEqual({
 				err: {
 					message: "test error",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("Error: test error"),
 				},
 			});
@@ -45,6 +46,7 @@ describe("WorkerTestEvaluator", () => {
 			expect(result).toStrictEqual({
 				err: {
 					message: "expected 'actual' to equal 'expected'",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("AssertionError: expected"),
 					expected: "expected",
 					actual: "actual",
@@ -61,6 +63,7 @@ describe("WorkerTestEvaluator", () => {
 			expect(result).toStrictEqual({
 				err: {
 					message: "expected 1 to equal 2",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("AssertionError: expected"),
 					expected: 2,
 					actual: 1,

@@ -1,5 +1,5 @@
-import { InitTestFrameOptions } from "./test-evaluators/frame-test-evaluator";
-import { InitWorkerOptions } from "./test-evaluators/worker-test-evaluator";
+import type { InitTestFrameOptions } from "./test-evaluators/frame-test-evaluator";
+import type { InitWorkerOptions } from "./test-evaluators/worker-test-evaluator";
 
 interface Runner {
 	init(opts?: InitOptions): Promise<void>;
@@ -19,7 +19,7 @@ const getFullAssetPath = (assetPath = "/dist/") => {
 	return assetPath;
 };
 
-type Config = {
+type RunnerConfig = {
 	source: string;
 	assetPath?: string;
 	script: string;
@@ -32,9 +32,12 @@ type InitOptions = {
 	};
 };
 
+export type ReadyEvent = MessageEvent<{ type: "ready" }>;
+export type ResultEvent = MessageEvent<{ type: "result"; value: unknown }>;
+
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
-	#createTestEvaluator({ source, assetPath, script }: Config) {
+	#createTestEvaluator({ source, assetPath, script }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
 		// TODO: can we append the script via appendChild?
@@ -45,7 +48,7 @@ export class FrameTestRunner implements Runner {
 		return iframe;
 	}
 
-	constructor(config: Config) {
+	constructor(config: RunnerConfig) {
 		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
@@ -61,7 +64,7 @@ export class FrameTestRunner implements Runner {
 		await isReady;
 
 		const isInitialized = new Promise((resolve) => {
-			window.addEventListener("message", (event) => {
+			window.addEventListener("message", (event: ReadyEvent) => {
 				if (
 					event.origin !== "null" ||
 					event.source !== this.#testEvaluator.contentWindow
@@ -87,7 +90,7 @@ export class FrameTestRunner implements Runner {
 
 	runTest(test: string) {
 		const result = new Promise((resolve) => {
-			window.addEventListener("message", (event) => {
+			window.addEventListener("message", (event: ResultEvent) => {
 				if (
 					event.origin !== "null" ||
 					event.source !== this.#testEvaluator.contentWindow
@@ -114,19 +117,19 @@ export class FrameTestRunner implements Runner {
 export class WorkerTestRunner implements Runner {
 	#testEvaluator: Worker;
 	#source: string;
-	#createTestEvaluator({ assetPath, script }: Config) {
+	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		return new Worker(scriptUrl);
 	}
 
-	constructor(config: Config) {
+	constructor(config: RunnerConfig) {
 		this.#source = config.source;
 		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
 	async init(opts: InitWorkerOptions) {
 		const isInitialized = new Promise((resolve) => {
-			this.#testEvaluator.onmessage = (event) => {
+			this.#testEvaluator.onmessage = (event: ReadyEvent) => {
 				if (event.data.type === "ready") resolve(true);
 			};
 		});
@@ -138,7 +141,7 @@ export class WorkerTestRunner implements Runner {
 	runTest(test: string) {
 		const result = new Promise((resolve) => {
 			// TODO: differentiate between messages
-			this.#testEvaluator.onmessage = (event) => {
+			this.#testEvaluator.onmessage = (event: ResultEvent) => {
 				resolve(event.data.value);
 			};
 		});

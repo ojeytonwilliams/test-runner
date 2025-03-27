@@ -7,7 +7,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "install-puppeteer-browser": "puppeteer browsers install chrome",
-    "lint": "eslint . && prettier --list-different .",
+    "lint": "eslint . && prettier --list-different . && tsc",
     "build": "webpack",
     "format": "prettier --write .",
     "prepare": "husky"

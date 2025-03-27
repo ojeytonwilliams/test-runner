@@ -118,6 +118,7 @@ describe("Test Runner", () => {
 				expect(result).toEqual({
 					err: {
 						message: "test error",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 						stack: expect.stringMatching("Error: test error"),
 					},
 				});
@@ -234,6 +235,7 @@ describe("Test Runner", () => {
 						actual: "test",
 						expected: "tes",
 						message: "expected 'test' to equal 'tes'",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 						stack: expect.stringMatching(
 							"AssertionError: expected 'test' to equal 'tes'",
 						),

@@ -8,14 +8,26 @@ export default tseslint.config(
 	{
 		ignores: ["dist/**", "__fixtures__/dist/**"],
 	},
-	eslint.configs.recommended,
-	tseslint.configs.recommended,
 	{
+		extends: [eslint.configs.recommended],
 		languageOptions: {
 			globals: {
 				...globals.node,
 			},
 		},
 		files: ["**/*.[mc]js"],
+	},
+	{
+		extends: [
+			eslint.configs.recommended,
+			tseslint.configs.recommendedTypeChecked,
+		],
+		languageOptions: {
+			parserOptions: {
+				projectService: true,
+				tsconfigRootDir: import.meta.dirname,
+			},
+		},
+		files: ["**/*.ts"],
 	},
 );
