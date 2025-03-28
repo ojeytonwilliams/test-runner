@@ -39,7 +39,8 @@ export class WorkerTestEvaluator implements TestEvaluator {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const code = opts.code.contents;
 				try {
-					await eval(`${opts.source}; __userCodeWasExecuted = true; 
+					await eval(`${opts.source};
+__userCodeWasExecuted = true; 
 ${test};`);
 				} catch (err) {
 					if (__userCodeWasExecuted) {

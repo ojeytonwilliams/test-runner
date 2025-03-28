@@ -24,6 +24,42 @@ describe("WorkerTestEvaluator", () => {
 			expect(result).toStrictEqual({ pass: true });
 		});
 
+		it("should handle incorrect source that ends in a comment", async () => {
+			await messenger.init({
+				code: {},
+				source: `
+const x = 2;
+// trailing comment`,
+			});
+
+			const test = "assert.equal(x, 1)";
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({
+				err: {
+					message: "expected 2 to equal 1",
+					expected: 1,
+					actual: 2,
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					stack: expect.stringMatching("AssertionError: expected"),
+				},
+			});
+		});
+
+		it("should handle correct source that ends in a comment", async () => {
+			await messenger.init({
+				code: {},
+				source: `
+const x = 1;
+// trailing comment`,
+			});
+
+			const test = "assert.equal(x, 1)";
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({ pass: true });
+		});
+
 		it("should handle a test that throws an error", async () => {
 			const test = "throw new Error('test error')";
 
