@@ -28,7 +28,6 @@ export default tseslint.config(
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},
-		// include d.ts files:
 		files: ["**/*.ts"],
 	},
 );

@@ -17,7 +17,6 @@ export type InitEvent<Data> = MessageEvent<{
 	value: Data;
 }>;
 
-// TODO: Can/should we export these from the packages?
 export interface InitTestFrameOptions {
 	code: {
 		contents?: string;
