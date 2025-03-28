@@ -6,7 +6,7 @@ import globals from "globals";
 
 export default tseslint.config(
 	{
-		ignores: ["dist/**", "__fixtures__/dist/**"],
+		ignores: ["dist/**", "__fixtures__/dist/**", "packages/**/build"],
 	},
 	{
 		extends: [eslint.configs.recommended],

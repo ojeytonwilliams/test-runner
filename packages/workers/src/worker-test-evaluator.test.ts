@@ -1,18 +1,12 @@
 /* @jest-environment jsdom */
 
-import { FrameTestEvaluator } from "../src/test-evaluators/frame-test-evaluator";
+import { WorkerTestEvaluator } from "./worker-test-evaluator";
 
-// This is a limited reset, but should be enough if we only add or remove
-// elements.
-const resetDocument = () => {
-	document.body.innerHTML = "";
-};
-
-describe("FrameTestEvaluator", () => {
-	let messenger: FrameTestEvaluator;
+describe("WorkerTestEvaluator", () => {
+	let messenger: WorkerTestEvaluator;
 
 	beforeEach(async () => {
-		messenger = new FrameTestEvaluator();
+		messenger = new WorkerTestEvaluator();
 		await messenger.init({ code: {} });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});
@@ -45,31 +39,36 @@ describe("FrameTestEvaluator", () => {
 		});
 
 		it("should handle a test that throws an error with expected and actual values", async () => {
-			const test =
-				"throw new chai.AssertionError('test error', { expected: 'expected', actual: 'actual' })";
+			const test = "assert.equal('actual', 'expected')";
 
 			const result = await messenger.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
-					message: "test error",
+					message: "expected 'actual' to equal 'expected'",
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					stack: expect.stringMatching("Error: test error"),
+					stack: expect.stringMatching("AssertionError: expected"),
 					expected: "expected",
 					actual: "actual",
 				},
 			});
 		});
 
-		it("should test against the enclosing document", async () => {
-			resetDocument();
-			document.body.appendChild(document.createElement("div"));
-			document.body.appendChild(document.createElement("div"));
+		it("should use the init code when running a test", async () => {
+			await messenger.init({ code: { contents: "let x = 1" } });
 
-			const test = "assert.equal(document.querySelectorAll('div').length, 2)";
+			const test = "assert.equal(x, 2)";
 			const result = await messenger.runTest(test);
 
-			expect(result).toStrictEqual({ pass: true });
+			expect(result).toStrictEqual({
+				err: {
+					message: "expected 1 to equal 2",
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+					stack: expect.stringMatching("AssertionError: expected"),
+					expected: 2,
+					actual: 1,
+				},
+			});
 		});
 	});
 });

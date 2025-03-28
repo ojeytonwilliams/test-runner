@@ -17,6 +17,21 @@ export type InitEvent<Data> = MessageEvent<{
 	value: Data;
 }>;
 
+export interface InitTestFrameOptions {
+	code: {
+		contents?: string;
+		editableContents?: string;
+	};
+	loadEnzyme?: boolean;
+}
+
+export interface InitWorkerOptions {
+	code: {
+		contents?: string;
+		editableContents?: string;
+	};
+}
+
 export interface TestEvaluator {
 	init(opts: unknown): Promise<void>;
 	runTest(test: string): Promise<Pass | Fail>;

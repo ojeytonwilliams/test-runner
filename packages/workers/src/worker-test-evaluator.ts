@@ -5,8 +5,8 @@ import type {
 	Fail,
 	InitEvent,
 	TestEvent,
-} from "./test-evaluator";
-import type { ResultEvent, ReadyEvent } from "../test-runner";
+} from "../../../types/test-evaluator";
+import type { ResultEvent, ReadyEvent } from "../../../types/test-runner";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
