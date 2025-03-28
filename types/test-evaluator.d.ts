@@ -35,7 +35,7 @@ export interface InitWorkerOptions {
 }
 
 export interface TestEvaluator {
-	init(opts: unknown): Promise<void>;
+	init(opts: unknown): Promise<void> | void;
 	runTest(test: string): Promise<Pass | Fail>;
 	handleMessage(e: MessageEvent): Promise<void>;
 }

@@ -64,8 +64,6 @@ ${test};`);
 				};
 			}
 		};
-		// init will be async in the future, so I've made it a promise now.
-		return Promise.resolve();
 	}
 
 	async runTest(test: string) {
@@ -80,7 +78,7 @@ ${test};`);
 			const msg: ResultEvent["data"] = { type: "result", value: result };
 			postMessage(msg);
 		} else if (e.data.type === "init") {
-			await this.init(e.data.value);
+			this.init(e.data.value);
 			postMessage(READY_MESSAGE);
 		}
 	}
