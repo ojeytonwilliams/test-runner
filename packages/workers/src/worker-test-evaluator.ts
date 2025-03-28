@@ -26,10 +26,23 @@ export class WorkerTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
 	init(opts: InitWorkerOptions) {
 		this.#runTest = async (test) => {
+			// This can be reassigned by the eval inside the try block, so it should be declared as a let
+			// eslint-disable-next-line prefer-const
+			let __userCodeWasExecuted = false;
 			try {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const code = opts.code.contents;
-				await eval(`${opts.source};${test}`);
+				try {
+					await eval(`${opts.source}; __userCodeWasExecuted = true; ${test};`);
+				} catch (err) {
+					if (__userCodeWasExecuted) {
+						// rethrow error, since test failed.
+						throw err;
+					} else {
+						// otherwise run the test against the code
+						await eval(test);
+					}
+				}
 				return { pass: true };
 			} catch (e: unknown) {
 				const error = e as Fail["err"];

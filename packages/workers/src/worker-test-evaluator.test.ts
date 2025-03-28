@@ -70,5 +70,15 @@ describe("WorkerTestEvaluator", () => {
 				},
 			});
 		});
+
+		it("should still run tests against code if the source throws", async () => {
+			const source = "throw Error('expected')";
+			await messenger.init({ code: { contents: source }, source });
+
+			const test = `assert.equal(code, \`${source}\`)`;
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({ pass: true });
+		});
 	});
 });
