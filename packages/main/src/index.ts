@@ -22,27 +22,27 @@ class FCCSandbox {
 		code,
 		assetPath,
 	}: {
+		// the compiled user code, evaluated before the tests.
 		source: string;
 		type: "frame" | "worker";
 		// TODO: can we avoid using `assetPath` and use `import.meta.url` instead?
 		assetPath?: string;
+		// the original user code, available for the tests to use.
 		code: { contents: string };
 	}) {
 		this.#testRunner?.dispose();
 		if (type === "frame") {
 			this.#testRunner = new FrameTestRunner({
-				source,
 				assetPath,
 				script: "frame-test-evaluator.mjs",
 			});
 		} else {
 			this.#testRunner = new WorkerTestRunner({
-				source,
 				assetPath,
 				script: "worker-test-evaluator.mjs",
 			});
 		}
-		await this.#testRunner.init({ code });
+		await this.#testRunner.init({ code, source });
 
 		return this.#testRunner;
 	}

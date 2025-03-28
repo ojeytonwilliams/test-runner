@@ -23,6 +23,7 @@ export interface InitTestFrameOptions {
 		editableContents?: string;
 	};
 	loadEnzyme?: boolean;
+	source: string;
 }
 
 export interface InitWorkerOptions {
@@ -30,6 +31,7 @@ export interface InitWorkerOptions {
 		contents?: string;
 		editableContents?: string;
 	};
+	source: string;
 }
 
 export interface TestEvaluator {

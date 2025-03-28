@@ -242,23 +242,71 @@ describe("Test Runner", () => {
 					},
 				});
 			});
+
+			it("should have access to the original code when running tests", async () => {
+				const source = "";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "// some code",
+						},
+					});
+					return runner.runTest("assert.equal(code, '// some code');");
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should run source scripts before running tests", async () => {
+				const source = "<script>const getFive = () => 5;</script>";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "// some code",
+						},
+					});
+					return runner.runTest("assert.equal(5, getFive());");
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {
-			it("should run tests after evaluating the code contents supplied to the runner", async () => {
-				const contents = "const getFive = () => 5;";
-				const result = await page.evaluate(async (contents) => {
+			it("should run tests after evaluating the source supplied to the runner", async () => {
+				const source = "const getFive = () => 5;";
+				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
-						source: "",
+						source,
 						type: "worker",
 						code: {
-							contents,
+							contents: "// should not be evaluated",
 						},
 					});
 					return runner.runTest(
 						"if(getFive() !== 5) { throw Error('getFive() should return 5') }",
 					);
-				}, contents);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should have access to the original code when running tests", async () => {
+				const source = "const getFive = () => 5;";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "worker",
+						code: {
+							contents: "// some code",
+						},
+					});
+					return runner.runTest("assert.equal(code, '// some code');");
+				}, source);
 
 				expect(result).toEqual({ pass: true });
 			});

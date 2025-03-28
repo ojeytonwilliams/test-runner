@@ -25,7 +25,6 @@ const getFullAssetPath = (assetPath = "/dist/") => {
 };
 
 type RunnerConfig = {
-	source: string;
 	assetPath?: string;
 	script: string;
 };
@@ -39,19 +38,23 @@ type InitOptions = {
 
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
-	#createTestEvaluator({ source, assetPath, script }: RunnerConfig) {
+	#script: string;
+	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
-		// TODO: can we append the script via appendChild?
-		const scriptUrl = getFullAssetPath(assetPath) + script;
-		iframe.srcdoc = source + `<script src='${scriptUrl}'></script>`;
 		iframe.id = "test-frame";
 
-		return iframe;
+		// TODO: can we append the script via appendChild?
+		const scriptUrl = getFullAssetPath(assetPath) + script;
+		const scriptHTML = `<script src='${scriptUrl}'></script>`;
+
+		return { iframe, scriptHTML };
 	}
 
 	constructor(config: RunnerConfig) {
-		this.#testEvaluator = this.#createTestEvaluator(config);
+		const { scriptHTML, iframe } = this.#createTestEvaluator(config);
+		this.#testEvaluator = iframe;
+		this.#script = scriptHTML;
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
@@ -61,6 +64,8 @@ export class FrameTestRunner implements Runner {
 				resolve(true);
 			});
 		});
+
+		this.#testEvaluator.srcdoc = `${opts.source} ${this.#script}`;
 
 		document.body.appendChild(this.#testEvaluator);
 		await isReady;
@@ -112,14 +117,12 @@ export class FrameTestRunner implements Runner {
 
 export class WorkerTestRunner implements Runner {
 	#testEvaluator: Worker;
-	#source: string;
 	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		return new Worker(scriptUrl);
 	}
 
 	constructor(config: RunnerConfig) {
-		this.#source = config.source;
 		this.#testEvaluator = this.#createTestEvaluator(config);
 	}
 
@@ -148,7 +151,7 @@ export class WorkerTestRunner implements Runner {
 
 		const msg: TestEvent["data"] = {
 			type: "test",
-			value: `${this.#source}; ${test}`,
+			value: test,
 		};
 		this.#testEvaluator.postMessage(msg);
 

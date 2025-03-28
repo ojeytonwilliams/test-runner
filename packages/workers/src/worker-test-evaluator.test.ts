@@ -7,7 +7,7 @@ describe("WorkerTestEvaluator", () => {
 
 	beforeEach(async () => {
 		messenger = new WorkerTestEvaluator();
-		await messenger.init({ code: {} });
+		await messenger.init({ code: {}, source: "" });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});
 
@@ -54,8 +54,8 @@ describe("WorkerTestEvaluator", () => {
 			});
 		});
 
-		it("should use the init code when running a test", async () => {
-			await messenger.init({ code: { contents: "let x = 1" } });
+		it("should use the init source when running a test", async () => {
+			await messenger.init({ code: {}, source: "let x = 1" });
 
 			const test = "assert.equal(x, 2)";
 			const result = await messenger.runTest(test);

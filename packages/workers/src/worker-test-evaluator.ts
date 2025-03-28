@@ -5,6 +5,7 @@ import type {
 	Fail,
 	InitEvent,
 	TestEvent,
+	InitWorkerOptions,
 } from "../../../types/test-evaluator";
 import type { ResultEvent, ReadyEvent } from "../../../types/test-runner";
 
@@ -19,13 +20,6 @@ declare global {
 // code.
 self.assert = assert;
 
-export interface InitWorkerOptions {
-	code: {
-		contents?: string;
-		editableContents?: string;
-	};
-}
-
 // TODO: currently this is almost identical to FrameTestEvaluator, can we make
 // it more DRY? Don't attempt until they're both more fleshed out.
 export class WorkerTestEvaluator implements TestEvaluator {
@@ -33,7 +27,9 @@ export class WorkerTestEvaluator implements TestEvaluator {
 	init(opts: InitWorkerOptions) {
 		this.#runTest = async (test) => {
 			try {
-				await eval(`${opts.code.contents};${test}`);
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const code = opts.code.contents;
+				await eval(`${opts.source};${test}`);
 				return { pass: true };
 			} catch (e: unknown) {
 				const error = e as Fail["err"];
