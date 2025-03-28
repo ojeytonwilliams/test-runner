@@ -159,5 +159,36 @@ assert.equal(x, 1)`;
 			const result = await messenger.runTest(test);
 			expect(result).toStrictEqual({ pass: true });
 		});
+
+		it("should have access to the curriculum-helpers", async () => {
+			const test = `assert.equal(typeof __helpers, 'object')`;
+
+			const result = await messenger.runTest(test);
+			expect(result).toStrictEqual({ pass: true });
+		});
+
+		it("should not be possible for user code to modify the __helpers object", async () => {
+			const tryToModify = `__helpers.newProperty = 'newProperty';`;
+			await messenger.runTest(tryToModify);
+
+			const checkUnchanged = `assert.isUndefined(__helpers.newProperty)`;
+			const result = await messenger.runTest(checkUnchanged);
+
+			expect(result).toStrictEqual({
+				pass: true,
+			});
+		});
+
+		it("should not be possible for user code to modify the assert object", async () => {
+			const tryToModify = `assert.newProperty = 'newProperty';`;
+			await messenger.runTest(tryToModify);
+
+			const checkUnchanged = `assert.isUndefined(assert.newProperty)`;
+			const result = await messenger.runTest(checkUnchanged);
+
+			expect(result).toStrictEqual({
+				pass: true,
+			});
+		});
 	});
 });

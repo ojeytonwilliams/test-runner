@@ -1,5 +1,7 @@
 import { assert } from "chai";
 
+import * as curriculumHelpers from "@freecodecamp/curriculum-helpers";
+
 import type {
 	TestEvaluator,
 	Fail,
@@ -13,12 +15,17 @@ const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
 	interface WorkerGlobalScope {
 		assert: typeof assert;
+		__helpers: typeof curriculumHelpers;
 	}
 }
 
-// assert has to be added to the global scope or it will get eliminated as dead
+// These have to be added to the global scope or they will get eliminated as dead
 // code.
 self.assert = assert;
+self.__helpers = curriculumHelpers;
+
+Object.freeze(self.__helpers);
+Object.freeze(self.assert);
 
 // The newline is important, because otherwise comments will cause the trailing
 // `}` to be ignored, breaking the tests.
