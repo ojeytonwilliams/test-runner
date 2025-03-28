@@ -20,12 +20,18 @@ declare global {
 // code.
 self.assert = assert;
 
+// The newline is important, because otherwise comments will cause the trailing
+// `}` to be ignored, breaking the tests.
+const wrapCode = (code: string) => `(async () => {${code};
+})();`;
+
 // TODO: currently this is almost identical to FrameTestEvaluator, can we make
 // it more DRY? Don't attempt until they're both more fleshed out.
 export class WorkerTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
 	init(opts: InitWorkerOptions) {
-		this.#runTest = async (test) => {
+		this.#runTest = async (rawTest) => {
+			const test = wrapCode(rawTest);
 			// This can be reassigned by the eval inside the try block, so it should be declared as a let
 			// eslint-disable-next-line prefer-const
 			let __userCodeWasExecuted = false;
@@ -33,7 +39,8 @@ export class WorkerTestEvaluator implements TestEvaluator {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const code = opts.code.contents;
 				try {
-					await eval(`${opts.source}; __userCodeWasExecuted = true; ${test};`);
+					await eval(`${opts.source}; __userCodeWasExecuted = true; 
+${test};`);
 				} catch (err) {
 					if (__userCodeWasExecuted) {
 						// rethrow error, since test failed.

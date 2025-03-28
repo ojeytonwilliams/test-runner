@@ -16,7 +16,7 @@ describe("WorkerTestEvaluator", () => {
 	});
 
 	describe("runTest", () => {
-		it("should evaluate a test in the messenger environment", async () => {
+		it("should handle tests that end in a comment", async () => {
 			const test = "// something that does not throw an error";
 
 			const result = await messenger.runTest(test);
@@ -78,6 +78,49 @@ describe("WorkerTestEvaluator", () => {
 			const test = `assert.equal(code, \`${source}\`)`;
 			const result = await messenger.runTest(test);
 
+			expect(result).toStrictEqual({ pass: true });
+		});
+
+		// This may not be doable, but it's worth investigating.
+		it.todo("should handle user code that overwrites `code`");
+
+		it("should be able to declare variables in the test that are already declared in the source", async () => {
+			await messenger.init({ code: {}, source: "const x = 1; const y = 2;" });
+
+			// if you naively eval the source + test, that would be
+			//
+			// `const x = 1; const y = 2; const x = 2; assert.equal(y, 2)`
+			//
+			// which would throw an error because you're redeclaring x
+			const test = "const x = 2; assert.equal(y, 2)";
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({ pass: true });
+		});
+
+		// This is probably behavior we want, but it's not how the client works at
+		// the moment.
+		it.failing("should NOT handle async sources (yet)", async () => {
+			await messenger.init({
+				code: {},
+				source: `let delay = () => new Promise((resolve) => setTimeout(resolve, 10));
+let x = 1;
+await delay();
+x = 2;`,
+			});
+			const test = "assert.equal(x, 2)";
+			const result = await messenger.runTest(test);
+			expect(result).toStrictEqual({ pass: true });
+		});
+
+		it("should handle async tests", async () => {
+			await messenger.init({
+				code: {},
+				source: "const x = 1;",
+			});
+			const test = `await new Promise((resolve) => setTimeout(resolve, 10));
+assert.equal(x, 1)`;
+			const result = await messenger.runTest(test);
 			expect(result).toStrictEqual({ pass: true });
 		});
 	});
