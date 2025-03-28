@@ -10,17 +10,14 @@ import type { ResultEvent, ReadyEvent } from "../../../types/test-runner";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
-	interface DedicatedWorkerGlobalScope {
+	interface WorkerGlobalScope {
 		assert: typeof assert;
 	}
 }
 
-// For TS to know that this file is to be used in a worker (and only in a
-// worker), we need to cast self.
-const ctx = self as unknown as DedicatedWorkerGlobalScope;
 // assert has to be added to the global scope or it will get eliminated as dead
 // code.
-ctx.assert = assert;
+self.assert = assert;
 
 export interface InitWorkerOptions {
 	code: {
@@ -74,6 +71,6 @@ export class WorkerTestEvaluator implements TestEvaluator {
 
 const worker = new WorkerTestEvaluator();
 
-ctx.onmessage = function (e: TestEvent | InitEvent<InitWorkerOptions>) {
+onmessage = function (e: TestEvent | InitEvent<InitWorkerOptions>) {
 	void worker.handleMessage(e);
 };

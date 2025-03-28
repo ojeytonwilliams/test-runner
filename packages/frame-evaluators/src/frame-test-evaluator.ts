@@ -20,12 +20,13 @@ export interface InitTestFrameOptions {
 	loadEnzyme?: boolean;
 }
 
-type FrameWindow = Window &
-	typeof globalThis & {
+declare global {
+	interface Window {
 		$: typeof jQuery;
-	};
+	}
+}
 
-(window as FrameWindow).$ = jQuery;
+window.$ = jQuery;
 
 export class FrameTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
