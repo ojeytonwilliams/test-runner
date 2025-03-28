@@ -36,6 +36,7 @@ module.exports = (env = {}) => {
 			filename: "[name].mjs",
 			// during testing, we need the files to be available for the test server:
 			path: isDev ? __dirname + "/__fixtures__/dist" : __dirname + "/dist",
+			clean: true,
 		},
 		module: {
 			rules: sources.map(({ name, path }) => ({
