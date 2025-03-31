@@ -274,6 +274,23 @@ describe("Test Runner", () => {
 
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should handle unclosed tags in the source", async () => {
+				const source = `<script> const getFive = () => 5; </script>;
+<script> const getSix = () => 6`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "// some code",
+						},
+					});
+					return runner.runTest("assert.equal(5, getFive());");
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {

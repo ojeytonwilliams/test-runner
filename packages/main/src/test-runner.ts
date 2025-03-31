@@ -65,7 +65,10 @@ export class FrameTestRunner implements Runner {
 			});
 		});
 
-		this.#testEvaluator.srcdoc = `${opts.source} ${this.#script}`;
+		// Note: the order matters a lot, because the source could include unclosed
+		// tags. Putting the script first means the script will always be correctly
+		// evaluated.
+		this.#testEvaluator.srcdoc = `${this.#script} ${opts.source}`;
 
 		document.body.appendChild(this.#testEvaluator);
 		await isReady;
