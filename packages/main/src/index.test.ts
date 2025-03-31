@@ -291,6 +291,39 @@ describe("Test Runner", () => {
 
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should serialize error responses", async () => {
+				const results = await page.evaluate(async () => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					const resultOne = await runner.runTest(
+						"assert.isNotEmpty(document.querySelectorAll('h1'))",
+					);
+					const resultTwo = await runner.runTest(
+						"assert.notEqual(Symbol('foo'), 'something')",
+					);
+					return [resultOne, resultTwo];
+				});
+
+				expect(results[0]).toEqual({
+					err: {
+						actual: "{}",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringMatching(
+							"AssertionError: expected  not to be empty",
+						),
+						message: "expected  not to be empty",
+					},
+				});
+				expect(results[1]).toEqual({
+					pass: true,
+				});
+			});
 		});
 
 		describe("worker evaluators", () => {

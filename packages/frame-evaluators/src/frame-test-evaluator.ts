@@ -158,7 +158,27 @@ export class FrameTestEvaluator implements TestEvaluator {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
 			const msg: ResultEvent["data"] = { type: "result", value: result };
-			self.parent.postMessage(msg, "*");
+			try {
+				self.parent.postMessage(msg, "*");
+			} catch {
+				// If we're unable to post the message, it must be because at least one
+				// of 'actual' or 'expected' is not transferable.
+				if ("err" in result) {
+					// one option is to always serialize, and that might be smarter, but
+					// this allows us to write cleaner tests.
+					const msgClone = {
+						type: "result",
+						value: {
+							err: {
+								...result.err,
+								actual: JSON.stringify(result.err?.actual),
+								expected: JSON.stringify(result.err?.expected),
+							},
+						},
+					};
+					self.parent.postMessage(msgClone, "*");
+				}
+			}
 		} else if (e.data.type === "init") {
 			await this.init(e.data.value);
 			self.parent.postMessage(READY_MESSAGE, "*");
