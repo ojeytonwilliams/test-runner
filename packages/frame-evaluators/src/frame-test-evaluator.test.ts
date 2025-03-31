@@ -71,5 +71,18 @@ describe("FrameTestEvaluator", () => {
 
 			expect(result).toStrictEqual({ pass: true });
 		});
+
+		it("should be able to test styles", async () => {
+			resetDocument();
+			const style = document.createElement("style");
+			style.innerHTML = "body { color: red; }";
+			document.body.appendChild(style);
+
+			const test =
+				"assert.equal(getComputedStyle(document.querySelector('body')).color, 'red')";
+			const result = await messenger.runTest(test);
+
+			expect(result).toStrictEqual({ pass: true });
+		});
 	});
 });
