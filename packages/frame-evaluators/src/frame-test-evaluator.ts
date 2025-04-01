@@ -19,6 +19,9 @@ export interface InitTestFrameOptions {
 		editableContents?: string;
 	};
 	loadEnzyme?: boolean;
+	hooks?: {
+		beforeAll?: string;
+	};
 }
 
 declare global {

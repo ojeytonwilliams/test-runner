@@ -365,6 +365,25 @@ describe("Test Runner", () => {
 
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should run the beforeAll function before evaluating the source", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+						code: {
+							contents: "",
+						},
+						hooks: {
+							beforeAll: "window.__before = 'and so it begins'",
+						},
+					});
+					return runner.runTest(
+						"assert.equal(window.__before,'and so it begins')",
+					);
+				});
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {

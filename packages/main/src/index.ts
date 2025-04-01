@@ -21,6 +21,7 @@ class FCCSandbox {
 		type,
 		code,
 		assetPath,
+		hooks,
 	}: {
 		// the compiled user code, evaluated before the tests.
 		source: string;
@@ -29,12 +30,16 @@ class FCCSandbox {
 		assetPath?: string;
 		// the original user code, available for the tests to use.
 		code: { contents: string };
+		hooks?: {
+			beforeAll?: string;
+		};
 	}) {
 		this.#testRunner?.dispose();
 		if (type === "frame") {
 			this.#testRunner = new FrameTestRunner({
 				assetPath,
 				script: "frame-test-evaluator.mjs",
+				hooks,
 			});
 		} else {
 			this.#testRunner = new WorkerTestRunner({

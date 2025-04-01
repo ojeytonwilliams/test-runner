@@ -27,6 +27,9 @@ const getFullAssetPath = (assetPath = "/dist/") => {
 type RunnerConfig = {
 	assetPath?: string;
 	script: string;
+	hooks?: {
+		beforeAll?: string;
+	};
 };
 
 type InitOptions = {
@@ -39,23 +42,31 @@ type InitOptions = {
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
 	#script: string;
-	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
+	#hooksScript: string;
+	#createTestEvaluator({ assetPath, script, hooks }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
 		iframe.allow = "autoplay";
 		iframe.id = "test-frame";
 
-		// TODO: can we append the script via appendChild?
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		const scriptHTML = `<script src='${scriptUrl}'></script>`;
 
-		return { iframe, scriptHTML };
+		const hooksScript = hooks?.beforeAll
+			? `<script>
+${hooks.beforeAll}
+</script>`
+			: "";
+
+		return { iframe, scriptHTML, hooksScript };
 	}
 
 	constructor(config: RunnerConfig) {
-		const { scriptHTML, iframe } = this.#createTestEvaluator(config);
+		const { scriptHTML, iframe, hooksScript } =
+			this.#createTestEvaluator(config);
 		this.#testEvaluator = iframe;
 		this.#script = scriptHTML;
+		this.#hooksScript = hooksScript;
 	}
 
 	// rather than trying to create an async constructor, we'll use an init method
@@ -69,7 +80,10 @@ export class FrameTestRunner implements Runner {
 		// Note: the order matters a lot, because the source could include unclosed
 		// tags. Putting the script first means the script will always be correctly
 		// evaluated.
-		this.#testEvaluator.srcdoc = `${this.#script} ${opts.source}`;
+		this.#testEvaluator.srcdoc = `
+${this.#script}
+${this.#hooksScript}
+${opts.source}`;
 
 		document.body.appendChild(this.#testEvaluator);
 		await isReady;
