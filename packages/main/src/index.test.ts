@@ -347,6 +347,24 @@ describe("Test Runner", () => {
 					err: { message: "The element has no supported sources." },
 				});
 			});
+
+			it("should allow tests to access local storage", async () => {
+				const source = `<body><h1>Hello World</h1></body>`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return runner.runTest(
+						"localStorage.setItem('test', 'value'); assert.equal(localStorage.getItem('test'), 'value');",
+					);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {

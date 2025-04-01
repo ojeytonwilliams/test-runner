@@ -9,6 +9,7 @@ import type {
 } from "../../../types/test-evaluator";
 
 import type { ReadyEvent, ResultEvent } from "../../../types/test-runner";
+import { MockLocalStorage } from "./mock-local-storage";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 
@@ -27,6 +28,11 @@ declare global {
 }
 
 window.$ = jQuery;
+
+// localStorage is not accessible in a sandboxed iframe, so we need to mock it
+Object.defineProperty(window, "localStorage", {
+	value: new MockLocalStorage(),
+});
 
 export class FrameTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
