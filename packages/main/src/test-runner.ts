@@ -42,6 +42,7 @@ export class FrameTestRunner implements Runner {
 	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
+		iframe.allow = "autoplay";
 		iframe.id = "test-frame";
 
 		// TODO: can we append the script via appendChild?

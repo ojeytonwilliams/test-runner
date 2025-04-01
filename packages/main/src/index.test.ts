@@ -324,6 +324,29 @@ describe("Test Runner", () => {
 					pass: true,
 				});
 			});
+
+			it("should allow tests to play audio", async () => {
+				const source = `<body><audio id='audio' src='nothing.mp3'></audio></body>`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return await runner.runTest(
+						"document.getElementById('audio').play()",
+					);
+				}, source);
+
+				// If it were unable to play, it would throw "play() failed because the
+				// user didn't interact with the document first". The following error
+				// only happens because it does try to play.
+				expect(result).toEqual({
+					err: { message: "The element has no supported sources." },
+				});
+			});
 		});
 
 		describe("worker evaluators", () => {
