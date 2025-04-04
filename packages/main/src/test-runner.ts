@@ -30,6 +30,7 @@ type RunnerConfig = {
 	hooks?: {
 		beforeAll?: string;
 	};
+	loadEnzyme?: boolean;
 };
 
 type InitOptions = {
@@ -71,6 +72,8 @@ ${hooks.beforeAll}
 
 	// rather than trying to create an async constructor, we'll use an init method
 	async init(opts: InitTestFrameOptions) {
+		console.log("init test evaluator");
+		console.log(JSON.stringify(opts));
 		const isReady = new Promise((resolve) => {
 			this.#testEvaluator.addEventListener("load", () => {
 				resolve(true);

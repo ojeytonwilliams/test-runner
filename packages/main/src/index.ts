@@ -22,6 +22,7 @@ class FCCSandbox {
 		code,
 		assetPath,
 		hooks,
+		loadEnzyme,
 	}: {
 		// the compiled user code, evaluated before the tests.
 		source: string;
@@ -33,6 +34,7 @@ class FCCSandbox {
 		hooks?: {
 			beforeAll?: string;
 		};
+		loadEnzyme?: boolean;
 	}) {
 		this.#testRunner?.dispose();
 		if (type === "frame") {
@@ -47,7 +49,7 @@ class FCCSandbox {
 				script: "worker-test-evaluator.mjs",
 			});
 		}
-		await this.#testRunner.init({ code, source });
+		await this.#testRunner.init({ code, source, loadEnzyme });
 
 		return this.#testRunner;
 	}

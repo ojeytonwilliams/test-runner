@@ -384,6 +384,32 @@ describe("Test Runner", () => {
 				});
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should be able to use Enzyme in tests", async () => {
+				const source = `<script src='https://unpkg.com/react@16.4.0/umd/react.production.min.js' type='text/javascript'></script>
+<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom.production.min.js' type='text/javascript'></script>
+<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom-test-utils.production.min.js' type='text/javascript'></script>
+<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom-server.browser.production.min.js' type='text/javascript'></script></head><body><div id='root'></div><div id='challenge-node'></div><script>"use strict";"use strict";
+
+var JSX = /*#__PURE__*/React.createElement("h1", null, "Hello JSX!");"use strict";
+
+ReactDOM.render(JSX, document.getElementById('root'));</script></body>`;
+
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+						loadEnzyme: true,
+					});
+					return runner.runTest(
+						"assert(Enzyme.shallow(JSX).contains('Hello JSX!'));",
+					);
+				}, source);
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {
