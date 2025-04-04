@@ -24,6 +24,9 @@ export interface InitTestFrameOptions {
 	};
 	loadEnzyme?: boolean;
 	source: string;
+	hooks?: {
+		beforeAll?: string;
+	};
 }
 
 export interface InitWorkerOptions {

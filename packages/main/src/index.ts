@@ -41,7 +41,6 @@ class FCCSandbox {
 			this.#testRunner = new FrameTestRunner({
 				assetPath,
 				script: "frame-test-evaluator.mjs",
-				hooks,
 			});
 		} else {
 			this.#testRunner = new WorkerTestRunner({
@@ -49,7 +48,7 @@ class FCCSandbox {
 				script: "worker-test-evaluator.mjs",
 			});
 		}
-		await this.#testRunner.init({ code, source, loadEnzyme });
+		await this.#testRunner.init({ code, source, loadEnzyme, hooks });
 
 		return this.#testRunner;
 	}

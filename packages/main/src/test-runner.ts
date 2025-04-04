@@ -38,13 +38,15 @@ type InitOptions = {
 		contents?: string;
 		editableContents?: string;
 	};
+	hooks?: {
+		beforeAll?: string;
+	};
 };
 
 export class FrameTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
 	#script: string;
-	#hooksScript: string;
-	#createTestEvaluator({ assetPath, script, hooks }: RunnerConfig) {
+	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
 		iframe.sandbox.add("allow-scripts");
 		iframe.allow = "autoplay";
@@ -53,27 +55,24 @@ export class FrameTestRunner implements Runner {
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		const scriptHTML = `<script src='${scriptUrl}'></script>`;
 
+		return { iframe, scriptHTML };
+	}
+
+	constructor(config: RunnerConfig) {
+		const { scriptHTML, iframe } = this.#createTestEvaluator(config);
+		this.#testEvaluator = iframe;
+		this.#script = scriptHTML;
+	}
+
+	// rather than trying to create an async constructor, we'll use an init method
+	async init(opts: InitTestFrameOptions) {
+		const { hooks } = opts;
 		const hooksScript = hooks?.beforeAll
 			? `<script>
 ${hooks.beforeAll}
 </script>`
 			: "";
 
-		return { iframe, scriptHTML, hooksScript };
-	}
-
-	constructor(config: RunnerConfig) {
-		const { scriptHTML, iframe, hooksScript } =
-			this.#createTestEvaluator(config);
-		this.#testEvaluator = iframe;
-		this.#script = scriptHTML;
-		this.#hooksScript = hooksScript;
-	}
-
-	// rather than trying to create an async constructor, we'll use an init method
-	async init(opts: InitTestFrameOptions) {
-		console.log("init test evaluator");
-		console.log(JSON.stringify(opts));
 		const isReady = new Promise((resolve) => {
 			this.#testEvaluator.addEventListener("load", () => {
 				resolve(true);
@@ -85,7 +84,7 @@ ${hooks.beforeAll}
 		// evaluated.
 		this.#testEvaluator.srcdoc = `
 ${this.#script}
-${this.#hooksScript}
+${hooksScript}
 ${opts.source}`;
 
 		document.body.appendChild(this.#testEvaluator);
