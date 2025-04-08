@@ -447,5 +447,204 @@ ReactDOM.render(JSX, document.getElementById('root'));</script></body>`;
 				expect(result).toEqual({ pass: true });
 			});
 		});
+
+		describe("python evaluator", () => {
+			beforeAll(async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "python",
+						code: {
+							contents: "",
+						},
+					});
+				});
+			});
+			it("should run tests after evaluating the source supplied to the runner", async () => {
+				const source = `def get_five():
+  return 5`;
+				const result = await page.evaluate(async (source) => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source,
+					});
+					return runner?.runTest(
+						`({
+test: () => assert.equal(runPython('get_five()'), 5),
+						})`,
+					);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should clear the source when init is called a second time", async () => {
+				const source = `def get_five():
+  return 5`;
+				await page.evaluate(async (source) => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source,
+					});
+				}, source);
+
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: "",
+					});
+					return runner?.runTest(
+						`({
+test: () => assert.equal(runPython('get_five()'), 5),
+						})`,
+					);
+				});
+
+				expect(result).toEqual({
+					err: {
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						message: expect.stringContaining(
+							"NameError: name 'get_five' is not defined",
+						),
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringContaining(
+							"NameError: name 'get_five' is not defined",
+						),
+					},
+				});
+			});
+
+			it("should set __name__ to __main__ when running tests", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: "",
+					});
+					return runner?.runTest(
+						`({
+test: () => assert.equal(runPython('__name__'), '__main__'),
+						})`,
+					);
+				});
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should handle js-only tests", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "# wrong comment for test",
+						},
+						source: "",
+					});
+					return runner?.runTest(`assert.equal(code, "# comment for test")`);
+				});
+				expect(result).toEqual({
+					err: {
+						actual: "# wrong comment for test",
+						expected: "# comment for test",
+						message:
+							"expected '# wrong comment for test' to equal '# comment for test'",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringMatching(
+							"AssertionError: expected '# wrong comment for test' to equal '# comment for test'",
+						),
+					},
+				});
+			});
+
+			it("should reject testStrings that evaluate to an invalid object ", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: "",
+					});
+					return runner?.runTest(`({ invalid: 'test' })`);
+				});
+
+				expect(result).toEqual({
+					err: {
+						message:
+							"Test string did not evaluate to an object with the 'test' property",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringContaining(
+							"Error: Test string did not evaluate to an object with the 'test' property",
+						),
+					},
+				});
+			});
+
+			it("should be able to test with mock input", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: `
+first = input()
+second = input()
+`,
+					});
+					return runner?.runTest(`({ 
+	input: ["argle", "bargle"],
+  test: () => assert.equal(runPython('first + second'), "arglebargle")
+})`);
+				});
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should make user code available to the python code as the _code variable", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "test = 'value'",
+						},
+						source: "",
+					});
+					return runner?.runTest(`({ 
+  test: () => assert.equal(runPython('_code'), "test = 'value'")
+})`);
+				});
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should make the AST helper available to the python code as _Node", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: "",
+					});
+					return runner?.runTest(`({ 
+  test: () => assert.equal(runPython('_Node("x = 1").get_variable("x")'), 1)
+})`);
+				});
+
+				expect(result).toEqual({ pass: true });
+			});
+		});
 	});
 });

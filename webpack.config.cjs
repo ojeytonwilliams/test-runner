@@ -5,15 +5,19 @@ const webpack = require("webpack");
 const sources = [
 	{
 		name: "index",
-		path: __dirname + "/packages/main/src/",
+		path: __dirname + "/packages/main/src",
 	},
 	{
 		name: "frame-test-evaluator",
-		path: __dirname + "/packages/frame-evaluators/src/",
+		path: __dirname + "/packages/frame-evaluators/src",
 	},
 	{
 		name: "worker-test-evaluator",
-		path: __dirname + "/packages/workers/src/",
+		path: __dirname + "/packages/workers/src",
+	},
+	{
+		name: "python-test-evaluator",
+		path: __dirname + "/packages/python-worker/src",
 	},
 ];
 

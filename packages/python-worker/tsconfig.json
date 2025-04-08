@@ -1,0 +1,11 @@
+{
+  "extends": "../../base-tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "lib": ["WebWorker"],
+    "outDir": "./build",
+    "paths": {
+      "pyodide/ffi": ["../../node_modules/pyodide/ffi.d.ts"] // Remove after updating pyodide (later versions correctly export ffi)
+    }
+  }
+}

@@ -26,7 +26,7 @@ class FCCSandbox {
 	}: {
 		// the compiled user code, evaluated before the tests.
 		source: string;
-		type: "frame" | "worker";
+		type: "frame" | "worker" | "python";
 		// TODO: can we avoid using `assetPath` and use `import.meta.url` instead?
 		assetPath?: string;
 		// the original user code, available for the tests to use.
@@ -37,16 +37,25 @@ class FCCSandbox {
 		loadEnzyme?: boolean;
 	}) {
 		this.#testRunner?.dispose();
-		if (type === "frame") {
-			this.#testRunner = new FrameTestRunner({
-				assetPath,
-				script: "frame-test-evaluator.mjs",
-			});
-		} else {
-			this.#testRunner = new WorkerTestRunner({
-				assetPath,
-				script: "worker-test-evaluator.mjs",
-			});
+		switch (type) {
+			case "frame":
+				this.#testRunner = new FrameTestRunner({
+					assetPath,
+					script: "frame-test-evaluator.mjs",
+				});
+				break;
+			case "worker":
+				this.#testRunner = new WorkerTestRunner({
+					assetPath,
+					script: "worker-test-evaluator.mjs",
+				});
+				break;
+			case "python":
+				this.#testRunner = new WorkerTestRunner({
+					assetPath,
+					script: "python-test-evaluator.mjs",
+				});
+				break;
 		}
 		await this.#testRunner.init({ code, source, loadEnzyme, hooks });
 
