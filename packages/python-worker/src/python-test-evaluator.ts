@@ -103,20 +103,9 @@ class PythonTestEvaluator implements TestEvaluator {
 			_code = f.read()
 		`);
 
-				try {
-					// Evaluates the learner's code so that any variables they define are
-					// available to the test.
-					runPython(opts.source);
-				} catch (e) {
-					const err = e as PythonError;
-
-					return {
-						err: {
-							message: err.message,
-							stack: err.stack,
-						},
-					};
-				}
+				// Evaluates the learner's code so that any variables they define are
+				// available to the test.
+				runPython(opts.source);
 
 				await test();
 
@@ -134,6 +123,7 @@ class PythonTestEvaluator implements TestEvaluator {
 						stack: (err as Error).stack,
 						expected: (err as { expected?: string }).expected,
 						actual: (err as { actual?: string }).actual,
+						type: (err as PythonError).type,
 					},
 				};
 			} finally {

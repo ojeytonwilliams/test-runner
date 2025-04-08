@@ -509,14 +509,10 @@ test: () => assert.equal(runPython('get_five()'), 5),
 					);
 				});
 
-				expect(result).toEqual({
+				expect(result).toMatchObject({
 					err: {
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 						message: expect.stringContaining(
-							"NameError: name 'get_five' is not defined",
-						),
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-						stack: expect.stringContaining(
 							"NameError: name 'get_five' is not defined",
 						),
 					},
@@ -644,6 +640,34 @@ second = input()
 				});
 
 				expect(result).toEqual({ pass: true });
+			});
+
+			it("should return error types if the python code raises an exception", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source: "",
+					});
+					return runner?.runTest(`({
+	test: () => assert.equal(runPython('1 + "1"'), 2)
+})`);
+				});
+				expect(result).toEqual({
+					err: {
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						message: expect.stringContaining(
+							"TypeError: unsupported operand type(s) for +: 'int' and 'str'",
+						),
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringContaining(
+							"TypeError: unsupported operand type(s) for +: 'int' and 'str'",
+						),
+						type: "TypeError",
+					},
+				});
 			});
 		});
 	});
