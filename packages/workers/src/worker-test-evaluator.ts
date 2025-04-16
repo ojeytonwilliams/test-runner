@@ -65,8 +65,8 @@ ${test};`);
 					err: {
 						message: error.message,
 						stack: error.stack,
-						...(error.expected && { expected: error.expected }),
-						...(error.actual && { actual: error.actual }),
+						...(!!error.expected && { expected: error.expected }),
+						...(!!error.actual && { actual: error.actual }),
 					},
 				};
 			}

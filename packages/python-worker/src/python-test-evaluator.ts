@@ -20,6 +20,13 @@ type EvaluatedTeststring = {
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 
+function isProxy(raw: unknown): raw is PyProxy {
+	return !!raw && typeof raw == "object" && "toJs" in raw;
+}
+
+const serialize = (obj: unknown) =>
+	isProxy(obj) ? (obj.toJs() as unknown) : obj;
+
 class PythonTestEvaluator implements TestEvaluator {
 	#pyodide?: PyodideInterface;
 	#runTest?: TestEvaluator["runTest"];
@@ -111,19 +118,25 @@ class PythonTestEvaluator implements TestEvaluator {
 
 				return { pass: true };
 			} catch (err) {
-				if (!(err instanceof chai.AssertionError)) {
-					console.error(err);
+				const error = err as PythonError;
+
+				if (!(error instanceof chai.AssertionError)) {
+					console.error(error);
 				}
+
+				const expected = serialize((err as { expected: unknown }).expected);
+				const actual = serialize((err as { actual: unknown }).actual);
+
 				// to provide useful debugging information when debugging the tests, we
 				// have to extract the message, stack and, if they exist, expected and
 				// actual before returning
 				return {
 					err: {
-						message: (err as Error).message,
-						stack: (err as Error).stack,
-						expected: (err as { expected?: string }).expected,
-						actual: (err as { actual?: string }).actual,
-						type: (err as PythonError).type,
+						message: error.message,
+						stack: error.stack,
+						...(!!expected && { expected }),
+						...(!!actual && { actual }),
+						type: error.type,
 					},
 				};
 			} finally {
@@ -156,7 +169,7 @@ class PythonTestEvaluator implements TestEvaluator {
 			},
 		);
 
-		self.postMessage({ type: "contentLoaded" });
+		// self.postMessage({ type: "contentLoaded" });
 
 		return pyodide;
 	}

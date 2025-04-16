@@ -669,6 +669,35 @@ second = input()
 					},
 				});
 			});
+
+			it("should stringify python objects before returning them to the caller", async () => {
+				const source = `import re
+pattern = re.compile('l+')
+`;
+				const result = await page.evaluate(async (source) => {
+					const runner = window.FCCSandbox.testRunner;
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source,
+					});
+					return runner?.runTest(`({ 
+	test: () => assert.equal(runPython('str(pattern)'), "l+") 
+})`);
+				}, source);
+				expect(result).toEqual({
+					err: {
+						actual: "re.compile('l+')",
+						expected: "l+",
+						message: "expected 're.compile(\\'l+\\')' to equal 'l+'",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringContaining(
+							"AssertionError: expected 're.compile(\\'l+\\')' to equal 'l+'",
+						),
+					},
+				});
+			});
 		});
 	});
 });

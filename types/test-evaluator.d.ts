@@ -6,8 +6,9 @@ export interface Fail {
 	err: {
 		message: string;
 		stack?: string;
-		expected?: string;
-		actual?: string;
+		// TODO: enforce string for expected and actual?
+		expected?: unknown;
+		actual?: unknown;
 	};
 }
 
