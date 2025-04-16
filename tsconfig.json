@@ -8,6 +8,9 @@
       "path": "./packages/workers"
     },
     {
+      "path": "./packages/python-worker"
+    },
+    {
       "path": "./packages/frame-evaluators"
     }
   ]
