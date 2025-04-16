@@ -336,7 +336,7 @@ describe("Test Runner", () => {
 						},
 					});
 					return await runner.runTest(
-						"document.getElementById('audio').play()",
+						"async () => await document.getElementById('audio').play()",
 					);
 				}, source);
 

@@ -116,19 +116,8 @@ export class FrameTestEvaluator implements TestEvaluator {
 				// eval test string to actual JavaScript
 				// This return can be a function
 				// i.e. function() { assert(true, 'happy coding'); }
-				const testPromise = new Promise((resolve, reject) =>
-					// To avoid race conditions, we have to run the test in a final
-					// document ready:
-					$(() => {
-						try {
-							const test: unknown = eval(testString);
-							resolve(test);
-						} catch (err) {
-							reject(err as Error);
-						}
-					}),
-				);
-				const test = await testPromise;
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+				const test = eval(testString);
 				if (typeof test === "function") {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 					await test();
