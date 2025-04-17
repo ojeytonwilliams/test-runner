@@ -64,12 +64,20 @@ module.exports = (env = {}) => {
 				util: require.resolve("util"),
 				stream: false,
 				process: require.resolve("process/browser.js"),
+				timers: require.resolve("timers-browserify"),
 			},
 			extensions: [".ts", ".js"],
 		},
 		plugins: [
 			new webpack.ProvidePlugin({
 				process: "process/browser",
+			}),
+			// @sinon/fake-timers can use 'timers/promises' if it's available, but
+			// 'timers-browserify' does not include it. This means webpack has to be
+			// told to ignore it, otherwise it will throw an error when trying to
+			// build.
+			new webpack.IgnorePlugin({
+				resourceRegExp: /timers\/promises/,
 			}),
 		],
 	};

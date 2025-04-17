@@ -410,6 +410,80 @@ ReactDOM.render(JSX, document.getElementById('root'));</script></body>`;
 				}, source);
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should be able to use FakeTimers in tests", async () => {
+				const source = `<div id="root"></div><script>
+const waitThenUpdate = async () => {
+	await new Promise(resolve => setTimeout(resolve, 1000));
+	document.getElementById('root').innerHTML = 'Updated';
+};
+</script>`;
+
+				const beforeAll = `const clock = __FakeTimers.install();`;
+
+				const result = await page.evaluate(
+					async (source, beforeAll) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							source,
+							type: "frame",
+							code: {
+								contents: "",
+							},
+							hooks: {
+								beforeAll,
+							},
+						});
+						return runner.runTest(`async () => {
+const update = waitThenUpdate();
+clock.tick(1000);
+assert.equal(document.getElementById('root').innerHTML, '');
+await update;
+assert.equal(document.getElementById('root').innerHTML, 'Updated');
+}
+`);
+					},
+					source,
+					beforeAll,
+				);
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should be possible to unmock the timers", async () => {
+				const source = "";
+
+				const beforeAll = `let clock = __FakeTimers.install();`;
+
+				const result = await page.evaluate(
+					async (source, beforeAll) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							source,
+							type: "frame",
+							code: {
+								contents: "",
+							},
+							hooks: {
+								beforeAll,
+							},
+						});
+						const testOne = await runner.runTest(`
+try {
+clock.tick(1000);
+assert.equal(clock.now, 1000);
+} finally {
+  clock.uninstall();
+}
+`);
+
+						const testTwo = await runner.runTest(
+							`assert.notEqual(Date.now(), 1000);`,
+						);
+						return [testOne, testTwo];
+					},
+					source,
+					beforeAll,
+				);
+				expect(result).toEqual([{ pass: true }, { pass: true }]);
+			});
 		});
 
 		describe("worker evaluators", () => {

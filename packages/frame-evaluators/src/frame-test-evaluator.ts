@@ -1,5 +1,6 @@
 import jQuery from "jquery";
 import * as helpers from "@freecodecamp/curriculum-helpers";
+import FakeTimers from "@sinonjs/fake-timers";
 
 import type {
 	TestEvaluator,
@@ -27,10 +28,12 @@ export interface InitTestFrameOptions {
 declare global {
 	interface Window {
 		$: typeof jQuery;
+		__FakeTimers: typeof FakeTimers;
 	}
 }
 
 window.$ = jQuery;
+window.__FakeTimers = FakeTimers;
 
 // localStorage is not accessible in a sandboxed iframe, so we need to mock it
 Object.defineProperty(window, "localStorage", {
