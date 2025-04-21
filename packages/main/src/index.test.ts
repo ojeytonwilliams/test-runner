@@ -484,6 +484,54 @@ assert.equal(clock.now, 1000);
 				);
 				expect(result).toEqual([{ pass: true }, { pass: true }]);
 			});
+
+			it("should quickly resolve runAll", async () => {
+				const source = `<script>
+const countDown = () => {				
+	let count = 0;
+	return new Promise((resolve) => {
+		const interval = setInterval(() => {
+		console.log(count);
+			count++;
+			if (count === 50) {
+				clearInterval(interval);
+				resolve(count);
+			}
+		}, 1000);
+	});
+}</script>
+`;
+
+				const beforeAll = `let clock = __FakeTimers.install();`;
+
+				const result = await page.evaluate(
+					async (source, beforeAll) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							source,
+							type: "frame",
+							code: {
+								contents: "",
+							},
+							hooks: {
+								beforeAll,
+							},
+						});
+						// if the timers weren't mocked this would take 50 seconds and the
+						// test would timeout
+						const result = await runner.runTest(`async() => {
+	const count = countDown();
+	clock.runAll();
+	assert.equal(await count, 50);
+}
+`);
+
+						return result;
+					},
+					source,
+					beforeAll,
+				);
+				expect(result).toEqual({ pass: true });
+			});
 		});
 
 		describe("worker evaluators", () => {
