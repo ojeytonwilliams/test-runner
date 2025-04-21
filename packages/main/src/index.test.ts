@@ -62,7 +62,54 @@ describe("Test Runner", () => {
 				expect(after).toBeFalsy();
 			});
 
-			it("should create a sandboxed iframe, when type is 'frame'", async () => {
+			it("should handle tests that throw errors", async () => {
+				const result = await page.evaluate(async () => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return runner.runTest("throw new Error('test error')");
+				});
+
+				expect(result).toEqual({
+					err: {
+						message: "test error",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringMatching("Error: test error"),
+					},
+				});
+			});
+
+			it("should remove any existing iframes when creating a worker", async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+				});
+				expect(await page.$("iframe")).toBeTruthy();
+
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "worker",
+						code: {
+							contents: "",
+						},
+					});
+				});
+				expect(await page.$("iframe")).toBeFalsy();
+			});
+		});
+
+		describe("iframe evaluators", () => {
+			it("should create a sandboxed iframe", async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
@@ -103,69 +150,6 @@ describe("Test Runner", () => {
 				expect(iframes.length).toBe(1);
 			});
 
-			it("should handle tests that throw errors", async () => {
-				const result = await page.evaluate(async () => {
-					const runner = await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "frame",
-						code: {
-							contents: "",
-						},
-					});
-					return runner.runTest("throw new Error('test error')");
-				});
-
-				expect(result).toEqual({
-					err: {
-						message: "test error",
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-						stack: expect.stringMatching("Error: test error"),
-					},
-				});
-			});
-
-			it('should not create a frame when type is "worker"', async () => {
-				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "worker",
-						code: {
-							contents: "",
-						},
-					});
-				});
-
-				const frame = await page.$("iframe");
-
-				expect(frame).toBeFalsy();
-			});
-
-			it("should remove any existing iframes when creating a worker", async () => {
-				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "frame",
-						code: {
-							contents: "",
-						},
-					});
-				});
-				expect(await page.$("iframe")).toBeTruthy();
-
-				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "worker",
-						code: {
-							contents: "",
-						},
-					});
-				});
-				expect(await page.$("iframe")).toBeFalsy();
-			});
-		});
-
-		describe("iframe evaluators", () => {
 			it("should ignore messages that do not come from the parent window", async () => {
 				const result = await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
@@ -535,6 +519,22 @@ const countDown = () => {
 		});
 
 		describe("worker evaluators", () => {
+			it("should not create a frame", async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "worker",
+						code: {
+							contents: "",
+						},
+					});
+				});
+
+				const frame = await page.$("iframe");
+
+				expect(frame).toBeFalsy();
+			});
+
 			it("should run tests after evaluating the source supplied to the runner", async () => {
 				const source = "const getFive = () => 5;";
 				const result = await page.evaluate(async (source) => {
