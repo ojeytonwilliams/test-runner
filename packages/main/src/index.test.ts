@@ -109,6 +109,11 @@ describe("Test Runner", () => {
 		});
 
 		describe("iframe evaluators", () => {
+			afterAll(async () => {
+				await page.evaluate(() => {
+					window.FCCSandbox.testRunner?.dispose();
+				});
+			});
 			it("should create a sandboxed iframe", async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
@@ -151,35 +156,45 @@ describe("Test Runner", () => {
 			});
 
 			it("should ignore messages that do not come from the parent window", async () => {
-				const result = await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "frame",
-						code: {
-							contents: "",
-						},
-					});
+				try {
+					const result = await page.evaluate(async () => {
+						await window.FCCSandbox.createTestRunner({
+							source: "",
+							type: "frame",
+							code: {
+								contents: "",
+							},
+						});
 
-					const otherFrame = document.createElement("iframe");
-					// post a message from a different window
-					otherFrame.srcdoc = `<script>let frame = window.parent.document.getElementById('test-frame').contentWindow.postMessage({ type: "test", value: "document.body.innerHTML.includes('<h1>Hello World</h1>')" }, "*");
+						const otherFrame = document.createElement("iframe");
+						// post a message from a different window
+						otherFrame.srcdoc = `<script>let frame = window.parent.document.getElementById('test-frame').contentWindow.postMessage({ type: "test", value: "document.body.innerHTML.includes('<h1>Hello World</h1>')" }, "*");
 						 </script>`;
 
-					// wait for a message from otherFrame
-					const awaitMessage = new Promise((resolve, reject) => {
-						setTimeout(() => {
-							resolve("done");
-						}, 100);
-						window.addEventListener("message", function handler() {
-							reject(Error("Should not have received a message"));
+						// wait for a message from otherFrame
+						const awaitMessage = new Promise((resolve, reject) => {
+							setTimeout(() => {
+								resolve("done");
+							}, 100);
+							window.addEventListener("message", function handler() {
+								reject(Error("Should not have received a message"));
+							});
+						});
+						document.body.appendChild(otherFrame);
+
+						return await awaitMessage;
+					});
+
+					expect(result).toBe("done");
+				} finally {
+					// clear all iframes
+					await page.evaluate(() => {
+						const iframes = document.querySelectorAll("iframe");
+						iframes.forEach((iframe) => {
+							iframe.remove();
 						});
 					});
-					document.body.appendChild(otherFrame);
-
-					return await awaitMessage;
-				});
-
-				expect(result).toBe("done");
+				}
 			});
 
 			it("should run tests against the sandboxed iframe", async () => {
