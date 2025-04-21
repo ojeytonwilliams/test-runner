@@ -68,6 +68,7 @@
   "dependencies": {
     "@sinonjs/fake-timers": "^14.0.0",
     "@types/sinonjs__fake-timers": "^8.1.5",
-    "pyodide": "0.23.3"
+    "pyodide": "0.23.3",
+    "timers-browserify": "^2.0.12"
   }
 }
