@@ -7,13 +7,26 @@ declare global {
 }
 
 class FCCSandbox {
-	#testRunner: FrameTestRunner | WorkerTestRunner | null;
+	#frameRunner: FrameTestRunner | null;
+	#workerRunner: WorkerTestRunner | null;
+	#pythonRunner: WorkerTestRunner | null;
 
 	constructor() {
-		this.#testRunner = null;
+		this.#frameRunner = null;
+		this.#workerRunner = null;
+		this.#pythonRunner = null;
 	}
-	get testRunner() {
-		return this.#testRunner;
+	getRunner(
+		type: "frame" | "worker" | "python",
+	): FrameTestRunner | WorkerTestRunner | null {
+		switch (type) {
+			case "frame":
+				return this.#frameRunner;
+			case "worker":
+				return this.#workerRunner;
+			case "python":
+				return this.#pythonRunner;
+		}
 	}
 
 	async createTestRunner({
@@ -36,30 +49,39 @@ class FCCSandbox {
 		};
 		loadEnzyme?: boolean;
 	}) {
-		this.#testRunner?.dispose();
+		let testRunner: FrameTestRunner | WorkerTestRunner | null = null;
 		switch (type) {
 			case "frame":
-				this.#testRunner = new FrameTestRunner({
-					assetPath,
-					script: "frame-test-evaluator.mjs",
-				});
+				if (!this.#frameRunner) {
+					this.#frameRunner = new FrameTestRunner({
+						assetPath,
+						script: "frame-test-evaluator.mjs",
+					});
+				}
+				testRunner = this.#frameRunner;
 				break;
 			case "worker":
-				this.#testRunner = new WorkerTestRunner({
-					assetPath,
-					script: "worker-test-evaluator.mjs",
-				});
+				if (!this.#workerRunner) {
+					this.#workerRunner = new WorkerTestRunner({
+						assetPath,
+						script: "worker-test-evaluator.mjs",
+					});
+				}
+				testRunner = this.#workerRunner;
 				break;
 			case "python":
-				this.#testRunner = new WorkerTestRunner({
-					assetPath,
-					script: "python-test-evaluator.mjs",
-				});
+				if (!this.#pythonRunner) {
+					this.#pythonRunner = new WorkerTestRunner({
+						assetPath,
+						script: "python-test-evaluator.mjs",
+					});
+				}
+				testRunner = this.#pythonRunner;
 				break;
 		}
-		await this.#testRunner.init({ code, source, loadEnzyme, hooks });
+		await testRunner.init({ code, source, loadEnzyme, hooks });
 
-		return this.#testRunner;
+		return testRunner;
 	}
 }
 
