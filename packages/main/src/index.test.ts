@@ -130,7 +130,7 @@ describe("Test Runner", () => {
 					return iframe.getAttribute("sandbox");
 				});
 
-				expect(sandbox).toBe("allow-scripts");
+				expect(sandbox).toBe("allow-scripts allow-forms");
 			});
 
 			it("should remove existing iframe before creating a new one", async () => {
@@ -362,6 +362,33 @@ describe("Test Runner", () => {
 					});
 					return runner.runTest(
 						"localStorage.setItem('test', 'value'); assert.equal(localStorage.getItem('test'), 'value');",
+					);
+				}, source);
+
+				expect(result).toEqual({ pass: true });
+			});
+
+			it("should allow form submission", async () => {
+				const source = `<script>
+var clicked = false;
+const onSubmit = () => {
+  clicked = true
+}
+
+	</script>
+<form id="form" onsubmit="onSubmit()"><button type='submit'></button></form>`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "frame",
+						code: {
+							contents: "",
+						},
+					});
+					return runner.runTest(
+						`const submitBtn = document.querySelector("button[type='submit']");
+submitBtn.click();
+assert.equal(clicked, true);`,
 					);
 				}, source);
 

@@ -48,7 +48,7 @@ export class FrameTestRunner implements Runner {
 	#script: string;
 	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
 		const iframe = document.createElement("iframe");
-		iframe.sandbox.add("allow-scripts");
+		iframe.sandbox.add("allow-scripts", "allow-forms");
 		iframe.allow = "autoplay";
 		iframe.id = "test-frame";
 
