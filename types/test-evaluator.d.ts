@@ -1,4 +1,4 @@
-interface Pass {
+export interface Pass {
 	pass: true;
 }
 

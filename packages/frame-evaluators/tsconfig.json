@@ -4,5 +4,10 @@
     "rootDir": "./src",
     "lib": ["dom"],
     "outDir": "./build"
-  }
+  },
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
 }

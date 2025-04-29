@@ -583,6 +583,33 @@ const countDown = () => {
 
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should stringify expected and actual values before returning them to the caller", async () => {
+				const source = "const symb = Symbol.for('foo');";
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "worker",
+						code: {
+							contents: "// some code",
+						},
+					});
+					return runner.runTest(
+						"assert.equal(Symbol.for('foo'), Symbol.for('bar'))",
+					);
+				}, source);
+				expect(result).toEqual({
+					err: {
+						actual: "Symbol(foo)",
+						expected: "Symbol(bar)",
+						message: "expected Symbol(foo) to equal Symbol(bar)",
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringMatching(
+							/AssertionError: expected Symbol\(foo\) to equal Symbol\(bar\)/,
+						),
+					},
+				});
+			});
 		});
 
 		describe("python evaluator", () => {

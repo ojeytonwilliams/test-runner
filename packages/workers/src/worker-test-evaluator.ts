@@ -9,7 +9,8 @@ import type {
 	TestEvent,
 	InitWorkerOptions,
 } from "../../../types/test-evaluator";
-import type { ResultEvent, ReadyEvent } from "../../../types/test-runner";
+import type { ReadyEvent } from "../../../types/test-runner";
+import { postCloneableMessage } from "../../shared/src/messages";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
@@ -82,8 +83,8 @@ ${test};`);
 	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
-			const msg: ResultEvent["data"] = { type: "result", value: result };
-			postMessage(msg);
+			const msg = { type: "result" as const, value: result };
+			postCloneableMessage(postMessage, msg);
 		} else if (e.data.type === "init") {
 			this.init(e.data.value);
 			postMessage(READY_MESSAGE);

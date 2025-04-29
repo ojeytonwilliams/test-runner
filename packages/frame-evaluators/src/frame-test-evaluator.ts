@@ -8,8 +8,9 @@ import type {
 	TestEvent,
 	InitEvent,
 } from "../../../types/test-evaluator";
+import type { ReadyEvent } from "../../../types/test-runner";
 
-import type { ReadyEvent, ResultEvent } from "../../../types/test-runner";
+import { postCloneableMessage } from "../../shared/src/messages";
 import { MockLocalStorage } from "./mock-local-storage";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
@@ -158,28 +159,8 @@ export class FrameTestEvaluator implements TestEvaluator {
 	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
-			const msg: ResultEvent["data"] = { type: "result", value: result };
-			try {
-				self.parent.postMessage(msg, "*");
-			} catch {
-				// If we're unable to post the message, it must be because at least one
-				// of 'actual' or 'expected' is not transferable.
-				if ("err" in result) {
-					// one option is to always serialize, and that might be smarter, but
-					// this allows us to write cleaner tests.
-					const msgClone = {
-						type: "result",
-						value: {
-							err: {
-								...result.err,
-								actual: JSON.stringify(result.err?.actual),
-								expected: JSON.stringify(result.err?.expected),
-							},
-						},
-					};
-					self.parent.postMessage(msgClone, "*");
-				}
-			}
+			const msg = { type: "result" as const, value: result };
+			postCloneableMessage((msg) => self.parent.postMessage(msg, "*"), msg);
 		} else if (e.data.type === "init") {
 			await this.init(e.data.value);
 			self.parent.postMessage(READY_MESSAGE, "*");

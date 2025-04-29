@@ -1,13 +1,8 @@
 {
   "extends": "../../base-tsconfig.json",
   "compilerOptions": {
+    "lib": [],
     "rootDir": "./src",
-    "lib": ["WebWorker"],
     "outDir": "./build"
-  },
-  "references": [
-    {
-      "path": "../shared"
-    }
-  ]
+  }
 }

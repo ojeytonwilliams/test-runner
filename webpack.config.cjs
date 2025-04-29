@@ -2,7 +2,7 @@ const webpack = require("webpack");
 
 // ts-loader doesn't seem to support multiple entry points, so we need to create
 // multiple sets of rules for each entry point.
-const sources = [
+const entrypointSources = [
 	{
 		name: "index",
 		path: __dirname + "/packages/main/src",
@@ -21,7 +21,16 @@ const sources = [
 	},
 ];
 
-const entry = sources.reduce(
+const sharedSources = [
+	{
+		name: "shared",
+		path: __dirname + "/packages/shared/src",
+	},
+];
+
+const allSources = [...entrypointSources, ...sharedSources];
+
+const entry = entrypointSources.reduce(
 	(acc, { name, path }) => ({
 		...acc,
 		[name]: `${path}/${name}.ts`,
@@ -43,7 +52,7 @@ module.exports = (env = {}) => {
 			clean: true,
 		},
 		module: {
-			rules: sources.map(({ name, path }) => ({
+			rules: allSources.map(({ name, path }) => ({
 				test: /\.ts$/,
 				include: path,
 				use: [
