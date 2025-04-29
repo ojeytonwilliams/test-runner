@@ -1,4 +1,5 @@
 import type { Pass, Fail } from "../../../types/test-evaluator";
+import { format } from "./format";
 
 type Message = {
 	type: "result";
@@ -17,16 +18,10 @@ export const postCloneableMessage = (
 		const result = msg.value;
 		if ("err" in result) {
 			const rawActual = result.err?.actual;
+			const actual = rawActual ? format(rawActual) : undefined;
 			const rawExpected = result.err?.expected;
+			const expected = rawExpected ? format(rawExpected) : undefined;
 
-			const actual =
-				typeof rawActual === "symbol"
-					? rawActual.toString()
-					: JSON.stringify(rawActual);
-			const expected =
-				typeof rawExpected === "symbol"
-					? rawExpected.toString()
-					: JSON.stringify(rawExpected);
 			// one option is to always serialize, and that might be smarter, but
 			// this allows us to write cleaner tests.
 			const msgClone = {

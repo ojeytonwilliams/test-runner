@@ -311,9 +311,12 @@ describe("Test Runner", () => {
 
 				expect(results[0]).toEqual({
 					err: {
-						actual: "{}",
+						actual: "NodeList []",
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 						stack: expect.stringMatching(
+							// Yes, there's a discrepancy between the error message and the
+							// actual value, but at the moment we don't use the stack in the
+							// client.
 							"AssertionError: expected  not to be empty",
 						),
 						message: "expected  not to be empty",
