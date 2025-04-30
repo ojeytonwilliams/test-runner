@@ -9,11 +9,11 @@ const resetDocument = () => {
 };
 
 describe("FrameTestEvaluator", () => {
-	let messenger: FrameTestEvaluator;
+	let evaluator: FrameTestEvaluator;
 
 	beforeEach(async () => {
-		messenger = new FrameTestEvaluator();
-		await messenger.init({ code: {} });
+		evaluator = new FrameTestEvaluator();
+		await evaluator.init({ code: {} });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});
 
@@ -22,10 +22,10 @@ describe("FrameTestEvaluator", () => {
 	});
 
 	describe("runTest", () => {
-		it("should evaluate a test in the messenger environment", async () => {
+		it("should evaluate a test in the evaluator environment", async () => {
 			const test = "// something that does not throw an error";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
@@ -33,7 +33,7 @@ describe("FrameTestEvaluator", () => {
 		it("should handle a test that throws an error", async () => {
 			const test = "throw new Error('test error')";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -48,7 +48,7 @@ describe("FrameTestEvaluator", () => {
 			const test =
 				"throw new chai.AssertionError('test error', { expected: 'expected', actual: 'actual' })";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -67,7 +67,7 @@ describe("FrameTestEvaluator", () => {
 			document.body.appendChild(document.createElement("div"));
 
 			const test = "assert.equal(document.querySelectorAll('div').length, 2)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
@@ -80,7 +80,7 @@ describe("FrameTestEvaluator", () => {
 
 			const test =
 				"assert.equal(getComputedStyle(document.querySelector('body')).color, 'red')";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});

@@ -168,11 +168,11 @@ export class FrameTestEvaluator implements TestEvaluator {
 	}
 }
 
-const messenger = new FrameTestEvaluator();
+const evaluator = new FrameTestEvaluator();
 
 onmessage = function (e: TestEvent | InitEvent<InitTestFrameOptions>) {
 	if (e.source !== self.parent) {
 		return;
 	}
-	void messenger.handleMessage(e);
+	void evaluator.handleMessage(e);
 };

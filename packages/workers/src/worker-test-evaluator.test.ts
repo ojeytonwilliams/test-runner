@@ -3,11 +3,11 @@
 import { WorkerTestEvaluator } from "./worker-test-evaluator";
 
 describe("WorkerTestEvaluator", () => {
-	let messenger: WorkerTestEvaluator;
+	let evaluator: WorkerTestEvaluator;
 
 	beforeEach(() => {
-		messenger = new WorkerTestEvaluator();
-		messenger.init({ code: {}, source: "" });
+		evaluator = new WorkerTestEvaluator();
+		evaluator.init({ code: {}, source: "" });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});
 
@@ -19,13 +19,13 @@ describe("WorkerTestEvaluator", () => {
 		it("should handle tests that end in a comment", async () => {
 			const test = "// something that does not throw an error";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
 
 		it("should handle incorrect source that ends in a comment", async () => {
-			messenger.init({
+			evaluator.init({
 				code: {},
 				source: `
 const x = 2;
@@ -33,7 +33,7 @@ const x = 2;
 			});
 
 			const test = "assert.equal(x, 1)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -47,7 +47,7 @@ const x = 2;
 		});
 
 		it("should handle correct source that ends in a comment", async () => {
-			messenger.init({
+			evaluator.init({
 				code: {},
 				source: `
 const x = 1;
@@ -55,7 +55,7 @@ const x = 1;
 			});
 
 			const test = "assert.equal(x, 1)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
@@ -63,7 +63,7 @@ const x = 1;
 		it("should handle a test that throws an error", async () => {
 			const test = "throw new Error('test error')";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -77,7 +77,7 @@ const x = 1;
 		it("should handle a test that throws an error with expected and actual values", async () => {
 			const test = "assert.equal('actual', 'expected')";
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -91,10 +91,10 @@ const x = 1;
 		});
 
 		it("should use the init source when running a test", async () => {
-			messenger.init({ code: {}, source: "let x = 1" });
+			evaluator.init({ code: {}, source: "let x = 1" });
 
 			const test = "assert.equal(x, 2)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
@@ -109,10 +109,10 @@ const x = 1;
 
 		it("should still run tests against code if the source throws", async () => {
 			const source = "throw Error('expected')";
-			messenger.init({ code: { contents: source }, source });
+			evaluator.init({ code: { contents: source }, source });
 
 			const test = `assert.equal(code, \`${source}\`)`;
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
@@ -121,7 +121,7 @@ const x = 1;
 		it.todo("should handle user code that overwrites `code`");
 
 		it("should be able to declare variables in the test that are already declared in the source", async () => {
-			messenger.init({ code: {}, source: "const x = 1; const y = 2;" });
+			evaluator.init({ code: {}, source: "const x = 1; const y = 2;" });
 
 			// if you naively eval the source + test, that would be
 			//
@@ -129,7 +129,7 @@ const x = 1;
 			//
 			// which would throw an error because you're redeclaring x
 			const test = "const x = 2; assert.equal(y, 2)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({ pass: true });
 		});
@@ -137,7 +137,7 @@ const x = 1;
 		// This is probably behavior we want, but it's not how the client works at
 		// the moment.
 		it.failing("should NOT handle async sources (yet)", async () => {
-			messenger.init({
+			evaluator.init({
 				code: {},
 				source: `let delay = () => new Promise((resolve) => setTimeout(resolve, 10));
 let x = 1;
@@ -145,34 +145,34 @@ await delay();
 x = 2;`,
 			});
 			const test = "assert.equal(x, 2)";
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 			expect(result).toStrictEqual({ pass: true });
 		});
 
 		it("should handle async tests", async () => {
-			messenger.init({
+			evaluator.init({
 				code: {},
 				source: "const x = 1;",
 			});
 			const test = `await new Promise((resolve) => setTimeout(resolve, 10));
 assert.equal(x, 1)`;
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 			expect(result).toStrictEqual({ pass: true });
 		});
 
 		it("should have access to the curriculum-helpers", async () => {
 			const test = `assert.equal(typeof __helpers, 'object')`;
 
-			const result = await messenger.runTest(test);
+			const result = await evaluator.runTest(test);
 			expect(result).toStrictEqual({ pass: true });
 		});
 
 		it("should not be possible for user code to modify the __helpers object", async () => {
 			const tryToModify = `__helpers.newProperty = 'newProperty';`;
-			await messenger.runTest(tryToModify);
+			await evaluator.runTest(tryToModify);
 
 			const checkUnchanged = `assert.isUndefined(__helpers.newProperty)`;
-			const result = await messenger.runTest(checkUnchanged);
+			const result = await evaluator.runTest(checkUnchanged);
 
 			expect(result).toStrictEqual({
 				pass: true,
@@ -181,10 +181,10 @@ assert.equal(x, 1)`;
 
 		it("should not be possible for user code to modify the assert object", async () => {
 			const tryToModify = `assert.newProperty = 'newProperty';`;
-			await messenger.runTest(tryToModify);
+			await evaluator.runTest(tryToModify);
 
 			const checkUnchanged = `assert.isUndefined(assert.newProperty)`;
-			const result = await messenger.runTest(checkUnchanged);
+			const result = await evaluator.runTest(checkUnchanged);
 
 			expect(result).toStrictEqual({
 				pass: true,
