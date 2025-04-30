@@ -16,7 +16,9 @@ export function format(x: unknown) {
 		return x.toString() + "n";
 	} else if (typeof x === "symbol") {
 		return x.toString();
-	} else if (x instanceof NodeList) {
+		// format is used in workers as well as documents, so we need to check for
+		// the existence of NodeList
+	} else if (typeof NodeList !== "undefined" && x instanceof NodeList) {
 		return x.length === 0 ? "NodeList []" : `NodeList(${x.length}) [...]`;
 	}
 	return inspect(x);
