@@ -22,8 +22,6 @@ export const postCloneableMessage = (
 			const rawExpected = result.err?.expected;
 			const expected = rawExpected ? format(rawExpected) : undefined;
 
-			// one option is to always serialize, and that might be smarter, but
-			// this allows us to write cleaner tests.
 			const msgClone = {
 				type: "result",
 				value: {

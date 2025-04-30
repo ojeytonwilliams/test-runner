@@ -169,8 +169,6 @@ class PythonTestEvaluator implements TestEvaluator {
 			},
 		);
 
-		// self.postMessage({ type: "contentLoaded" });
-
 		return pyodide;
 	}
 
