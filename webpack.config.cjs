@@ -46,7 +46,7 @@ module.exports = (env = {}) => {
 		cache: isDev ? { type: "filesystem" } : false,
 		entry,
 		output: {
-			filename: "[name].mjs",
+			filename: "[name].js",
 			// during testing, we need the files to be available for the test server:
 			path: isDev ? __dirname + "/__fixtures__/dist" : __dirname + "/dist",
 			clean: true,

@@ -55,7 +55,7 @@ class FCCSandbox {
 				if (!this.#frameRunner) {
 					this.#frameRunner = new FrameTestRunner({
 						assetPath,
-						script: "frame-test-evaluator.mjs",
+						script: "frame-test-evaluator.js",
 					});
 				}
 				testRunner = this.#frameRunner;
@@ -64,7 +64,7 @@ class FCCSandbox {
 				if (!this.#workerRunner) {
 					this.#workerRunner = new WorkerTestRunner({
 						assetPath,
-						script: "worker-test-evaluator.mjs",
+						script: "worker-test-evaluator.js",
 					});
 				}
 				testRunner = this.#workerRunner;
@@ -73,7 +73,7 @@ class FCCSandbox {
 				if (!this.#pythonRunner) {
 					this.#pythonRunner = new WorkerTestRunner({
 						assetPath,
-						script: "python-test-evaluator.mjs",
+						script: "python-test-evaluator.js",
 					});
 				}
 				testRunner = this.#pythonRunner;
