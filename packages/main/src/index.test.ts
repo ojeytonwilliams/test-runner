@@ -413,10 +413,10 @@ assert.equal(clicked, true);`,
 			});
 
 			it("should be able to use Enzyme in tests", async () => {
-				const source = `<script src='https://unpkg.com/react@16.4.0/umd/react.production.min.js' type='text/javascript'></script>
-<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom.production.min.js' type='text/javascript'></script>
-<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom-test-utils.production.min.js' type='text/javascript'></script>
-<script src='https://unpkg.com/react-dom@16.4.0/umd/react-dom-server.browser.production.min.js' type='text/javascript'></script></head><body><div id='root'></div><div id='challenge-node'></div><script>"use strict";"use strict";
+				const source = `<script src='https://cdnjs.cloudflare.com/ajax/libs/react/16.4.0/umd/react.production.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.0/umd/react-dom.production.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.0/umd/react-dom-test-utils.production.min.js' type='text/javascript'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.4.0/umd/react-dom-server.browser.production.min.js' type='text/javascript'></script></head><body><div id='root'></div><div id='challenge-node'></div><script>"use strict";"use strict";
 
 var JSX = /*#__PURE__*/React.createElement("h1", null, "Hello JSX!");"use strict";
 
