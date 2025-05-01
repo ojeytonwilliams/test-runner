@@ -4,6 +4,8 @@ import type {
 	TestEvent,
 	InitWorkerOptions,
 	InitTestFrameOptions,
+	Pass,
+	Fail,
 } from "../../../types/test-evaluator";
 
 interface Runner {
@@ -12,7 +14,7 @@ interface Runner {
 	// is to stop evaluation if it is looping indefinitely, but any abort
 	// mechanism (e.g. Promise.race or AbortController) would not get called in
 	// that case.
-	runTest(test: string, timeout?: number): Promise<unknown>;
+	runTest(test: string, timeout?: number): Promise<Pass | Fail>;
 	dispose(): void;
 }
 
@@ -116,7 +118,7 @@ ${opts.source}`;
 	}
 
 	runTest(test: string) {
-		const result = new Promise((resolve) => {
+		const result = new Promise<Pass | Fail>((resolve) => {
 			window.addEventListener("message", (event: ResultEvent) => {
 				if (
 					event.origin !== "null" ||
@@ -178,7 +180,7 @@ export class WorkerTestRunner implements Runner {
 	}
 	async runTest(test: string, timeout = 5000) {
 		let terminateTimeoutId: ReturnType<typeof setTimeout> | undefined;
-		const terminate = new Promise((resolve) => {
+		const terminate = new Promise<Fail>((resolve) => {
 			terminateTimeoutId = setTimeout(() => {
 				this.dispose();
 				void this.#recreateRunner().then(() => {
@@ -186,7 +188,7 @@ export class WorkerTestRunner implements Runner {
 				});
 			}, timeout);
 		});
-		const result = new Promise((resolve) => {
+		const result = new Promise<Pass | Fail>((resolve) => {
 			// TODO: differentiate between messages
 			this.#testEvaluator.onmessage = (event: ResultEvent) => {
 				resolve(event.data.value);
