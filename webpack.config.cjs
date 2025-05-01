@@ -8,16 +8,16 @@ const entrypointSources = [
 		path: __dirname + "/packages/main/src",
 	},
 	{
-		name: "frame-test-evaluator",
-		path: __dirname + "/packages/frame-evaluators/src",
+		name: "dom-test-evaluator",
+		path: __dirname + "/packages/dom-evaluator/src",
 	},
 	{
-		name: "worker-test-evaluator",
-		path: __dirname + "/packages/workers/src",
+		name: "javascript-test-evaluator",
+		path: __dirname + "/packages/javascript-evaluator/src",
 	},
 	{
 		name: "python-test-evaluator",
-		path: __dirname + "/packages/python-worker/src",
+		path: __dirname + "/packages/python-evaluator/src",
 	},
 ];
 

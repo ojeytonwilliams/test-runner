@@ -27,7 +27,7 @@ describe("Test Runner", () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -44,7 +44,7 @@ describe("Test Runner", () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -53,7 +53,7 @@ describe("Test Runner", () => {
 
 				const before = await page.$("iframe");
 				await page.evaluate(() => {
-					window.FCCSandbox.getRunner("frame")?.dispose();
+					window.FCCSandbox.getRunner("dom")?.dispose();
 				});
 
 				const after = await page.$("iframe");
@@ -66,7 +66,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -87,7 +87,7 @@ describe("Test Runner", () => {
 				const sameIframe = await page.evaluate(async () => {
 					const runnerOne = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "// some code",
 						},
@@ -95,7 +95,7 @@ describe("Test Runner", () => {
 
 					const runnerTwo = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "// some different code",
 						},
@@ -108,7 +108,7 @@ describe("Test Runner", () => {
 				const sameWorker = await page.evaluate(async () => {
 					const runnerOne = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some code",
 						},
@@ -116,7 +116,7 @@ describe("Test Runner", () => {
 
 					const runnerTwo = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some different code",
 						},
@@ -131,14 +131,14 @@ describe("Test Runner", () => {
 		describe("iframe evaluators", () => {
 			afterAll(async () => {
 				await page.evaluate(() => {
-					window.FCCSandbox.getRunner("frame")?.dispose();
+					window.FCCSandbox.getRunner("dom")?.dispose();
 				});
 			});
 			it("should create a sandboxed iframe", async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -158,7 +158,7 @@ describe("Test Runner", () => {
 					const result = await page.evaluate(async () => {
 						await window.FCCSandbox.createTestRunner({
 							source: "",
-							type: "frame",
+							type: "dom",
 							code: {
 								contents: "",
 							},
@@ -200,7 +200,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -219,7 +219,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -245,7 +245,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "// some code",
 						},
@@ -261,7 +261,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "// some code",
 						},
@@ -278,7 +278,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "// some code",
 						},
@@ -293,7 +293,7 @@ describe("Test Runner", () => {
 				const results = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -330,7 +330,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -353,7 +353,7 @@ describe("Test Runner", () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -378,7 +378,7 @@ const onSubmit = () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -397,7 +397,7 @@ assert.equal(clicked, true);`,
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -425,7 +425,7 @@ ReactDOM.render(JSX, document.getElementById('root'));</script></body>`;
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "frame",
+						type: "dom",
 						code: {
 							contents: "",
 						},
@@ -452,7 +452,7 @@ const waitThenUpdate = async () => {
 					async (source, beforeAll) => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
-							type: "frame",
+							type: "dom",
 							code: {
 								contents: "",
 							},
@@ -484,7 +484,7 @@ assert.equal(document.getElementById('root').innerHTML, 'Updated');
 					async (source, beforeAll) => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
-							type: "frame",
+							type: "dom",
 							code: {
 								contents: "",
 							},
@@ -535,7 +535,7 @@ const countDown = () => {
 					async (source, beforeAll) => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
-							type: "frame",
+							type: "dom",
 							code: {
 								contents: "",
 							},
@@ -566,7 +566,7 @@ const countDown = () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
 						source: "",
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "",
 						},
@@ -583,7 +583,7 @@ const countDown = () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// should not be evaluated",
 						},
@@ -601,7 +601,7 @@ const countDown = () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some code",
 						},
@@ -617,7 +617,7 @@ const countDown = () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some code",
 						},

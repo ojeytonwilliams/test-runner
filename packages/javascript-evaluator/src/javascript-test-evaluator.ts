@@ -33,9 +33,9 @@ Object.freeze(self.assert);
 const wrapCode = (code: string) => `(async () => {${code};
 })();`;
 
-// TODO: currently this is almost identical to FrameTestEvaluator, can we make
+// TODO: currently this is almost identical to DOMTestEvaluator, can we make
 // it more DRY? Don't attempt until they're both more fleshed out.
-export class WorkerTestEvaluator implements TestEvaluator {
+export class JavascriptTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
 	init(opts: InitWorkerOptions) {
 		this.#runTest = async (rawTest) => {
@@ -92,7 +92,7 @@ ${test};`);
 	}
 }
 
-const worker = new WorkerTestEvaluator();
+const worker = new JavascriptTestEvaluator();
 
 onmessage = function (e: TestEvent | InitEvent<InitWorkerOptions>) {
 	void worker.handleMessage(e);

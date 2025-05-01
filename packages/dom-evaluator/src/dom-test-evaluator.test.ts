@@ -1,6 +1,6 @@
 /* @jest-environment jsdom */
 
-import { FrameTestEvaluator } from "./frame-test-evaluator";
+import { DOMTestEvaluator } from "./dom-test-evaluator";
 
 // This is a limited reset, but should be enough if we only add or remove
 // elements.
@@ -8,11 +8,11 @@ const resetDocument = () => {
 	document.body.innerHTML = "";
 };
 
-describe("FrameTestEvaluator", () => {
-	let evaluator: FrameTestEvaluator;
+describe("DOMTestEvaluator", () => {
+	let evaluator: DOMTestEvaluator;
 
 	beforeEach(async () => {
-		evaluator = new FrameTestEvaluator();
+		evaluator = new DOMTestEvaluator();
 		await evaluator.init({ code: {} });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});

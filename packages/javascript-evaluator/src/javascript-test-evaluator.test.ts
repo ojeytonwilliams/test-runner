@@ -1,12 +1,12 @@
 /* @jest-environment jsdom */
 
-import { WorkerTestEvaluator } from "./worker-test-evaluator";
+import { JavascriptTestEvaluator } from "./javascript-test-evaluator";
 
-describe("WorkerTestEvaluator", () => {
-	let evaluator: WorkerTestEvaluator;
+describe("JavascriptTestEvaluator", () => {
+	let evaluator: JavascriptTestEvaluator;
 
 	beforeEach(() => {
-		evaluator = new WorkerTestEvaluator();
+		evaluator = new JavascriptTestEvaluator();
 		evaluator.init({ code: {}, source: "" });
 		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});

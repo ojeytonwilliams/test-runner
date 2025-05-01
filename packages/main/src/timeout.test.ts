@@ -11,7 +11,7 @@ function run() {return 1}`;
 				const timeoutResult = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some code",
 						},
@@ -20,7 +20,7 @@ function run() {return 1}`;
 				}, source);
 
 				const result = await page.evaluate(async () => {
-					const runner = window.FCCSandbox.getRunner("worker");
+					const runner = window.FCCSandbox.getRunner("javascript");
 					return runner?.runTest("assert.equal(run(), 1);", 100);
 				});
 
@@ -43,7 +43,7 @@ loop();
 				const timeoutResult = await page.evaluate(async (source) => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
-						type: "worker",
+						type: "javascript",
 						code: {
 							contents: "// some code",
 						},

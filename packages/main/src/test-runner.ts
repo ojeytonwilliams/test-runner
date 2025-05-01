@@ -49,7 +49,7 @@ type InitOptions = {
 	};
 };
 
-export class FrameTestRunner implements Runner {
+export class DOMTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
 	#script: string;
 	#createTestEvaluator({ assetPath, script }: RunnerConfig) {

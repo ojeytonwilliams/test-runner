@@ -5,13 +5,13 @@
       "path": "./packages/main"
     },
     {
-      "path": "./packages/workers"
+      "path": "./packages/javascript-evaluator"
     },
     {
-      "path": "./packages/python-worker"
+      "path": "./packages/python-evaluator"
     },
     {
-      "path": "./packages/frame-evaluators"
+      "path": "./packages/dom-evaluator"
     },
     {
       "path": "./packages/shared"

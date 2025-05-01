@@ -41,7 +41,7 @@ Object.defineProperty(window, "localStorage", {
 	value: new MockLocalStorage(),
 });
 
-export class FrameTestEvaluator implements TestEvaluator {
+export class DOMTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
 	async init(opts: InitTestFrameOptions) {
 		const codeObj = opts.code;
@@ -163,7 +163,7 @@ export class FrameTestEvaluator implements TestEvaluator {
 	}
 }
 
-const evaluator = new FrameTestEvaluator();
+const evaluator = new DOMTestEvaluator();
 
 onmessage = function (e: TestEvent | InitEvent<InitTestFrameOptions>) {
 	if (e.source !== self.parent) {

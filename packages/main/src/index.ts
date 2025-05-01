@@ -1,4 +1,4 @@
-import { FrameTestRunner, WorkerTestRunner } from "./test-runner";
+import { DOMTestRunner, WorkerTestRunner } from "./test-runner";
 
 declare global {
 	interface Window {
@@ -7,23 +7,23 @@ declare global {
 }
 
 class FCCSandbox {
-	#frameRunner: FrameTestRunner | null;
-	#workerRunner: WorkerTestRunner | null;
+	#DOMRunner: DOMTestRunner | null;
+	#javascriptRunner: WorkerTestRunner | null;
 	#pythonRunner: WorkerTestRunner | null;
 
 	constructor() {
-		this.#frameRunner = null;
-		this.#workerRunner = null;
+		this.#DOMRunner = null;
+		this.#javascriptRunner = null;
 		this.#pythonRunner = null;
 	}
 	getRunner(
-		type: "frame" | "worker" | "python",
-	): FrameTestRunner | WorkerTestRunner | null {
+		type: "dom" | "javascript" | "python",
+	): DOMTestRunner | WorkerTestRunner | null {
 		switch (type) {
-			case "frame":
-				return this.#frameRunner;
-			case "worker":
-				return this.#workerRunner;
+			case "dom":
+				return this.#DOMRunner;
+			case "javascript":
+				return this.#javascriptRunner;
 			case "python":
 				return this.#pythonRunner;
 		}
@@ -39,7 +39,7 @@ class FCCSandbox {
 	}: {
 		// the compiled user code, evaluated before the tests.
 		source: string;
-		type: "frame" | "worker" | "python";
+		type: "dom" | "javascript" | "python";
 		// TODO: can we avoid using `assetPath` and use `import.meta.url` instead?
 		assetPath?: string;
 		// the original user code, available for the tests to use.
@@ -49,25 +49,25 @@ class FCCSandbox {
 		};
 		loadEnzyme?: boolean;
 	}) {
-		let testRunner: FrameTestRunner | WorkerTestRunner | null = null;
+		let testRunner: DOMTestRunner | WorkerTestRunner | null = null;
 		switch (type) {
-			case "frame":
-				if (!this.#frameRunner) {
-					this.#frameRunner = new FrameTestRunner({
+			case "dom":
+				if (!this.#DOMRunner) {
+					this.#DOMRunner = new DOMTestRunner({
 						assetPath,
-						script: "frame-test-evaluator.js",
+						script: "dom-test-evaluator.js",
 					});
 				}
-				testRunner = this.#frameRunner;
+				testRunner = this.#DOMRunner;
 				break;
-			case "worker":
-				if (!this.#workerRunner) {
-					this.#workerRunner = new WorkerTestRunner({
+			case "javascript":
+				if (!this.#javascriptRunner) {
+					this.#javascriptRunner = new WorkerTestRunner({
 						assetPath,
-						script: "worker-test-evaluator.js",
+						script: "javascript-test-evaluator.js",
 					});
 				}
-				testRunner = this.#workerRunner;
+				testRunner = this.#javascriptRunner;
 				break;
 			case "python":
 				if (!this.#pythonRunner) {
