@@ -8,7 +8,11 @@ import type {
 
 interface Runner {
 	init(opts?: InitOptions): Promise<void>;
-	runTest(test: string): Promise<unknown>;
+	// Note: timeouts are currently ignored in the FrameRunner, since the purpose
+	// is to stop evaluation if it is looping indefinitely, but any abort
+	// mechanism (e.g. Promise.race or AbortController) would not get called in
+	// that case.
+	runTest(test: string, timeout?: number): Promise<unknown>;
 	dispose(): void;
 }
 
@@ -137,9 +141,11 @@ ${opts.source}`;
 
 export class WorkerTestRunner implements Runner {
 	#testEvaluator: Worker;
+	#opts: InitWorkerOptions | null = null;
+	#scriptUrl = "";
 	#createTestEvaluator({ assetPath, script }: RunnerConfig) {
-		const scriptUrl = getFullAssetPath(assetPath) + script;
-		return new Worker(scriptUrl);
+		this.#scriptUrl = getFullAssetPath(assetPath) + script;
+		return new Worker(this.#scriptUrl);
 	}
 
 	constructor(config: RunnerConfig) {
@@ -147,6 +153,7 @@ export class WorkerTestRunner implements Runner {
 	}
 
 	async init(opts: InitWorkerOptions) {
+		this.#opts = opts;
 		const isInitialized = new Promise((resolve) => {
 			this.#testEvaluator.onmessage = (event: ReadyEvent) => {
 				if (event.data.type === "ready") resolve(true);
@@ -161,7 +168,24 @@ export class WorkerTestRunner implements Runner {
 		await isInitialized;
 	}
 
-	runTest(test: string) {
+	async #recreateRunner() {
+		if (!this.#opts || !this.#scriptUrl) {
+			throw new Error("WorkerTestRunner not initialized");
+		} else {
+			this.#testEvaluator = new Worker(this.#scriptUrl);
+			await this.init(this.#opts);
+		}
+	}
+	async runTest(test: string, timeout = 5000) {
+		let terminateTimeoutId: ReturnType<typeof setTimeout> | undefined;
+		const terminate = new Promise((resolve) => {
+			terminateTimeoutId = setTimeout(() => {
+				this.dispose();
+				void this.#recreateRunner().then(() => {
+					resolve({ err: { message: "Test timed out" } });
+				});
+			}, timeout);
+		});
 		const result = new Promise((resolve) => {
 			// TODO: differentiate between messages
 			this.#testEvaluator.onmessage = (event: ResultEvent) => {
@@ -175,7 +199,11 @@ export class WorkerTestRunner implements Runner {
 		};
 		this.#testEvaluator.postMessage(msg);
 
-		return result;
+		try {
+			return await Promise.race([result, terminate]);
+		} finally {
+			clearTimeout(terminateTimeoutId);
+		}
 	}
 
 	dispose() {
