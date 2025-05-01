@@ -7,5 +7,10 @@
     "paths": {
       "pyodide/ffi": ["../../node_modules/pyodide/ffi.d.ts"] // Remove after updating pyodide (later versions correctly export ffi)
     }
-  }
+  },
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ]
 }

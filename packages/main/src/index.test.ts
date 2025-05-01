@@ -890,6 +890,41 @@ pattern = re.compile('l+')
 					},
 				});
 			});
+
+			it("should handle DataCloneErrors", async () => {
+				const source = `
+import re
+
+pattern = re.compile('l+')`;
+				const result = await page.evaluate(async (source) => {
+					const runner = window.FCCSandbox.getRunner("python");
+					await runner?.init({
+						code: {
+							contents: "",
+						},
+						source,
+					});
+					// since the comparison includes a PyProxy object, that will be
+					// posted back to the caller and cause a DataCloneError
+					return runner?.runTest(`
+  ({ test: () => assert.equal(__userGlobals.get("pattern"), "l+") })
+`);
+				}, source);
+
+				expect(result).toEqual({
+					err: {
+						actual: "re.compile('l+')",
+						expected: "l+",
+						// Yes, the message doesn't match the "actual" value, it's not
+						// ideal, but we only use message and stack for debugging.
+
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						message: expect.stringContaining("expected PyProxy"),
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+						stack: expect.stringContaining("AssertionError: expected PyProxy"),
+					},
+				});
+			});
 		});
 	});
 });

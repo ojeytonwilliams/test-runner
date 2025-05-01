@@ -11,7 +11,8 @@ import {
 	TestEvaluator,
 	TestEvent,
 } from "../../../types/test-evaluator";
-import { ReadyEvent, ResultEvent } from "../../../types/test-runner";
+import { ReadyEvent } from "../../../types/test-runner";
+import { postCloneableMessage } from "../../shared/src/messages";
 
 type EvaluatedTeststring = {
 	input?: string[];
@@ -25,7 +26,8 @@ function isProxy(raw: unknown): raw is PyProxy {
 }
 
 const serialize = (obj: unknown) =>
-	isProxy(obj) ? (obj.toJs() as unknown) : obj;
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+	isProxy(obj) ? (obj.toJs().toString() as string) : obj;
 
 class PythonTestEvaluator implements TestEvaluator {
 	#pyodide?: PyodideInterface;
@@ -181,8 +183,8 @@ class PythonTestEvaluator implements TestEvaluator {
 	): Promise<void> {
 		if (e.data.type === "test") {
 			const result = await this.#runTest!(e.data.value);
-			const msg: ResultEvent["data"] = { type: "result", value: result };
-			postMessage(msg);
+			const msg = { type: "result" as const, value: result };
+			postCloneableMessage(postMessage, msg);
 		} else if (e.data.type === "init") {
 			await this.init(e.data.value);
 			postMessage(READY_MESSAGE);
