@@ -559,6 +559,55 @@ const countDown = () => {
 				);
 				expect(result).toEqual({ pass: true });
 			});
+
+			it("should remove the test evaluator script after it has been evaluated", async () => {
+				const source = `<script></script>`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "dom",
+						code: {
+							contents: source,
+						},
+					});
+
+					// if the test evaluator script is still in the DOM the
+					// querySelectorAll will find two scripts
+					return runner.runTest(
+						"assert.equal(document.querySelectorAll('script').length, 1);",
+					);
+				}, source);
+
+				expect(result).toEqual({
+					pass: true,
+				});
+			});
+
+			it("should remove the hooks script after it has been evaluated", async () => {
+				const source = `<script></script>`;
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "dom",
+						code: {
+							contents: source,
+						},
+						hooks: {
+							beforeAll: "window.__before = 'and so it begins'",
+						},
+					});
+
+					// if the test evaluator script is still in the DOM the
+					// querySelectorAll will find two scripts
+					return runner.runTest(
+						"assert.equal(document.querySelectorAll('script').length, 1);",
+					);
+				}, source);
+
+				expect(result).toEqual({
+					pass: true,
+				});
+			});
 		});
 
 		describe("worker evaluators", () => {

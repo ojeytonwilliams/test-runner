@@ -11,6 +11,10 @@ import type {
 import type { ReadyEvent } from "../../../types/test-runner";
 
 import { postCloneableMessage } from "../../shared/src/messages";
+import {
+	TEST_EVALUATOR_SCRIPT_ID,
+	TEST_EVALUATOR_HOOKS_ID,
+} from "../../shared/src/ids";
 import { MockLocalStorage } from "./mock-local-storage";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
@@ -41,9 +45,17 @@ Object.defineProperty(window, "localStorage", {
 	value: new MockLocalStorage(),
 });
 
+const removeTestScripts = () => {
+	const parentScript = document.getElementById(TEST_EVALUATOR_SCRIPT_ID);
+	parentScript?.remove();
+	const hooksScript = document.getElementById(TEST_EVALUATOR_HOOKS_ID);
+	hooksScript?.remove();
+};
+
 export class DOMTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
 	async init(opts: InitTestFrameOptions) {
+		removeTestScripts();
 		const codeObj = opts.code;
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */

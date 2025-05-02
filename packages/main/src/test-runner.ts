@@ -8,6 +8,11 @@ import type {
 	Fail,
 } from "../../../types/test-evaluator";
 
+import {
+	TEST_EVALUATOR_SCRIPT_ID,
+	TEST_EVALUATOR_HOOKS_ID,
+} from "../../shared/src/ids";
+
 interface Runner {
 	init(opts?: InitOptions): Promise<void>;
 	// Note: timeouts are currently ignored in the FrameRunner, since the purpose
@@ -59,7 +64,7 @@ export class DOMTestRunner implements Runner {
 		iframe.id = "test-frame";
 
 		const scriptUrl = getFullAssetPath(assetPath) + script;
-		const scriptHTML = `<script src='${scriptUrl}'></script>`;
+		const scriptHTML = `<script id='${TEST_EVALUATOR_SCRIPT_ID}' src='${scriptUrl}'></script>`;
 
 		return { iframe, scriptHTML };
 	}
@@ -74,7 +79,7 @@ export class DOMTestRunner implements Runner {
 	async init(opts: InitTestFrameOptions) {
 		const { hooks } = opts;
 		const hooksScript = hooks?.beforeAll
-			? `<script>
+			? `<script id='${TEST_EVALUATOR_HOOKS_ID}'>
 ${hooks.beforeAll}
 </script>`
 			: "";
