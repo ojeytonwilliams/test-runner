@@ -54,6 +54,13 @@ type InitOptions = {
 	};
 };
 
+const hideFrame = (iframe: HTMLIFrameElement) => {
+	iframe.style.position = "absolute";
+	iframe.style.left = "-9999px";
+	iframe.style.top = "-9999px";
+	iframe.style.visibility = "hidden";
+};
+
 export class DOMTestRunner implements Runner {
 	#testEvaluator: HTMLIFrameElement;
 	#script: string;
@@ -62,7 +69,7 @@ export class DOMTestRunner implements Runner {
 		iframe.sandbox.add("allow-scripts", "allow-forms");
 		iframe.allow = "autoplay";
 		iframe.id = "test-frame";
-		iframe.style.display = "none";
+		hideFrame(iframe);
 
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		const scriptHTML = `<script id='${TEST_EVALUATOR_SCRIPT_ID}' src='${scriptUrl}'></script>`;

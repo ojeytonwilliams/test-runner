@@ -165,11 +165,46 @@ describe("Test Runner", () => {
 				});
 
 				const iframe = await page.$("iframe");
-				const display = await iframe?.evaluate(
-					(iframe) => window.getComputedStyle(iframe).display,
-				);
+				const style = await iframe?.evaluate((iframe) => {
+					const style = window.getComputedStyle(iframe);
+					return {
+						left: style.left,
+						top: style.top,
+						visibility: style.visibility,
+						position: style.position,
+					};
+				});
 
-				expect(display).toBe("none");
+				expect(style).toEqual({
+					left: "-9999px",
+					top: "-9999px",
+					visibility: "hidden",
+					position: "absolute",
+				});
+			});
+
+			it("should layout the iframe correctly", async () => {
+				const source = `<body>
+				indented text
+</body>`;
+
+				const result = await page.evaluate(async (source) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						source,
+						type: "dom",
+						code: {
+							contents: "",
+						},
+					});
+
+					return await runner.runTest(
+						`assert.equal(document.querySelector('body').innerText, 'indented text')`,
+					);
+				}, source);
+
+				expect(result).toEqual({
+					pass: true,
+				});
 			});
 
 			it("should ignore messages that do not come from the parent window", async () => {
