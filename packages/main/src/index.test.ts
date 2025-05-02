@@ -153,6 +153,25 @@ describe("Test Runner", () => {
 				expect(sandbox).toBe("allow-scripts allow-forms");
 			});
 
+			it("should hide the iframe from the user", async () => {
+				await page.evaluate(async () => {
+					await window.FCCSandbox.createTestRunner({
+						source: "",
+						type: "dom",
+						code: {
+							contents: "",
+						},
+					});
+				});
+
+				const iframe = await page.$("iframe");
+				const display = await iframe?.evaluate(
+					(iframe) => window.getComputedStyle(iframe).display,
+				);
+
+				expect(display).toBe("none");
+			});
+
 			it("should ignore messages that do not come from the parent window", async () => {
 				try {
 					const result = await page.evaluate(async () => {

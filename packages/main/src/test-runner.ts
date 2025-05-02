@@ -62,6 +62,7 @@ export class DOMTestRunner implements Runner {
 		iframe.sandbox.add("allow-scripts", "allow-forms");
 		iframe.allow = "autoplay";
 		iframe.id = "test-frame";
+		iframe.style.display = "none";
 
 		const scriptUrl = getFullAssetPath(assetPath) + script;
 		const scriptHTML = `<script id='${TEST_EVALUATOR_SCRIPT_ID}' src='${scriptUrl}'></script>`;
