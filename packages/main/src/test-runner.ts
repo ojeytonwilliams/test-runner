@@ -93,9 +93,11 @@ ${hooks.beforeAll}
 			: "";
 
 		const isReady = new Promise((resolve) => {
-			this.#testEvaluator.addEventListener("load", () => {
+			const listener = () => {
+				this.#testEvaluator.removeEventListener("load", listener);
 				resolve(true);
-			});
+			};
+			this.#testEvaluator.addEventListener("load", listener);
 		});
 
 		// Note: the order matters a lot, because the source could include unclosed
@@ -110,15 +112,18 @@ ${opts.source}`;
 		await isReady;
 
 		const isInitialized = new Promise((resolve) => {
-			window.addEventListener("message", (event: ReadyEvent) => {
+			const listener = (event: ReadyEvent) => {
 				if (
-					event.origin !== "null" ||
-					event.source !== this.#testEvaluator.contentWindow
+					event.origin === "null" &&
+					event.source === this.#testEvaluator.contentWindow &&
+					event.data.type === "ready"
 				) {
-					return;
+					window.removeEventListener("message", listener);
+					resolve(true);
 				}
-				if (event.data.type === "ready") resolve(true);
-			});
+			};
+
+			window.addEventListener("message", listener);
 		});
 
 		const msg: InitEvent<InitTestFrameOptions>["data"] = {
@@ -132,15 +137,16 @@ ${opts.source}`;
 
 	runTest(test: string) {
 		const result = new Promise<Pass | Fail>((resolve) => {
-			window.addEventListener("message", (event: ResultEvent) => {
+			const listener = (event: ResultEvent) => {
 				if (
-					event.origin !== "null" ||
-					event.source !== this.#testEvaluator.contentWindow
+					event.origin === "null" &&
+					event.source === this.#testEvaluator.contentWindow
 				) {
-					return;
+					window.removeEventListener("message", listener);
+					resolve(event.data.value);
 				}
-				resolve(event.data.value);
-			});
+			};
+			window.addEventListener("message", listener);
 		});
 
 		const msg: TestEvent["data"] = { type: "test", value: test };
@@ -170,9 +176,13 @@ export class WorkerTestRunner implements Runner {
 	async init(opts: InitWorkerOptions) {
 		this.#opts = opts;
 		const isInitialized = new Promise((resolve) => {
-			this.#testEvaluator.onmessage = (event: ReadyEvent) => {
-				if (event.data.type === "ready") resolve(true);
+			const listener = (event: ReadyEvent) => {
+				if (event.data.type === "ready") {
+					this.#testEvaluator.removeEventListener("message", listener);
+					resolve(true);
+				}
 			};
+			this.#testEvaluator.addEventListener("message", listener);
 		});
 
 		const msg: InitEvent<InitWorkerOptions>["data"] = {
@@ -202,10 +212,12 @@ export class WorkerTestRunner implements Runner {
 			}, timeout);
 		});
 		const result = new Promise<Pass | Fail>((resolve) => {
-			// TODO: differentiate between messages
-			this.#testEvaluator.onmessage = (event: ResultEvent) => {
+			const listener = (event: ResultEvent) => {
+				this.#testEvaluator.removeEventListener("message", listener);
+				// TODO: differentiate between messages
 				resolve(event.data.value);
 			};
+			this.#testEvaluator.addEventListener("message", listener);
 		});
 
 		const msg: TestEvent["data"] = {

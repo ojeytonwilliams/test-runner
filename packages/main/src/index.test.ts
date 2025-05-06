@@ -126,6 +126,31 @@ describe("Test Runner", () => {
 				});
 				expect(sameWorker).toBe(true);
 			});
+
+			it.each([
+				{ type: "dom" },
+				{ type: "javascript" },
+				{ type: "python" },
+			] as const)(
+				"should ignore events that are not from the $type test evaluator",
+				async ({ type }) => {
+					const result = await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							source: "",
+							type,
+							code: {
+								contents: "",
+							},
+						});
+
+						const resultPromise = runner.runTest("assert.equal(1, 1)");
+						window.parent.postMessage({ type: "test" }, "*");
+						return resultPromise;
+					}, type);
+
+					expect(result).toEqual({ pass: true });
+				},
+			);
 		});
 
 		describe("iframe evaluators", () => {
