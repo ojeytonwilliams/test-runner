@@ -19,23 +19,23 @@ export type InitEvent<Data> = MessageEvent<{
 }>;
 
 export interface InitTestFrameOptions {
-	code: {
+	code?: {
 		contents?: string;
 		editableContents?: string;
 	};
 	loadEnzyme?: boolean;
-	source: string;
+	source?: string;
 	hooks?: {
 		beforeAll?: string;
 	};
 }
 
 export interface InitWorkerOptions {
-	code: {
+	code?: {
 		contents?: string;
 		editableContents?: string;
 	};
-	source: string;
+	source?: string;
 }
 
 export interface TestEvaluator {

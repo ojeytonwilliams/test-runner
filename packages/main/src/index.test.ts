@@ -25,13 +25,7 @@ describe("Test Runner", () => {
 			it("should be instantiated by createTestRunner", async () => {
 				const before = await page.$("iframe");
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "dom",
-						code: {
-							contents: "",
-						},
-					});
+					await window.FCCSandbox.createTestRunner({ type: "dom" });
 				});
 
 				const after = await page.$("iframe");
@@ -42,13 +36,7 @@ describe("Test Runner", () => {
 
 			it("should be disposable", async () => {
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "dom",
-						code: {
-							contents: "",
-						},
-					});
+					await window.FCCSandbox.createTestRunner({ type: "dom" });
 				});
 
 				const before = await page.$("iframe");
@@ -65,11 +53,7 @@ describe("Test Runner", () => {
 			it("should handle tests that throw errors", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return runner.runTest("throw new Error('test error')");
 				});
@@ -86,7 +70,6 @@ describe("Test Runner", () => {
 			it("should reuse old runners if createTestRunner is called multiple times", async () => {
 				const sameIframe = await page.evaluate(async () => {
 					const runnerOne = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "dom",
 						code: {
 							contents: "// some code",
@@ -94,7 +77,6 @@ describe("Test Runner", () => {
 					});
 
 					const runnerTwo = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "dom",
 						code: {
 							contents: "// some different code",
@@ -107,7 +89,6 @@ describe("Test Runner", () => {
 
 				const sameWorker = await page.evaluate(async () => {
 					const runnerOne = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "javascript",
 						code: {
 							contents: "// some code",
@@ -115,7 +96,6 @@ describe("Test Runner", () => {
 					});
 
 					const runnerTwo = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "javascript",
 						code: {
 							contents: "// some different code",
@@ -135,13 +115,7 @@ describe("Test Runner", () => {
 				"should ignore events that are not from the $type test evaluator",
 				async ({ type }) => {
 					const result = await page.evaluate(async (type) => {
-						const runner = await window.FCCSandbox.createTestRunner({
-							source: "",
-							type,
-							code: {
-								contents: "",
-							},
-						});
+						const runner = await window.FCCSandbox.createTestRunner({ type });
 
 						const resultPromise = runner.runTest("assert.equal(1, 1)");
 						window.parent.postMessage({ type: "test" }, "*");
@@ -161,13 +135,7 @@ describe("Test Runner", () => {
 			});
 			it("should create a sandboxed iframe", async () => {
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "dom",
-						code: {
-							contents: "",
-						},
-					});
+					await window.FCCSandbox.createTestRunner({ type: "dom" });
 				});
 
 				const iframe = await page.$("iframe");
@@ -180,13 +148,7 @@ describe("Test Runner", () => {
 
 			it("should hide the iframe from the user", async () => {
 				await page.evaluate(async () => {
-					await window.FCCSandbox.createTestRunner({
-						source: "",
-						type: "dom",
-						code: {
-							contents: "",
-						},
-					});
+					await window.FCCSandbox.createTestRunner({ type: "dom" });
 				});
 
 				const iframe = await page.$("iframe");
@@ -217,9 +179,6 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 
 					return await runner.runTest(
@@ -235,13 +194,7 @@ describe("Test Runner", () => {
 			it("should ignore messages that do not come from the parent window", async () => {
 				try {
 					const result = await page.evaluate(async () => {
-						await window.FCCSandbox.createTestRunner({
-							source: "",
-							type: "dom",
-							code: {
-								contents: "",
-							},
-						});
+						await window.FCCSandbox.createTestRunner({ type: "dom" });
 
 						const otherFrame = document.createElement("iframe");
 						// post a message from a different window
@@ -280,9 +233,6 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return runner.runTest(
 						"assert.include(document.body.innerHTML,`<h1>Hello World</h1>`)",
@@ -299,9 +249,6 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return runner.runTest("assert.equal(someGlobal, 'tes')");
 				}, source);
@@ -371,11 +318,7 @@ describe("Test Runner", () => {
 			it("should serialize error responses", async () => {
 				const results = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					const resultOne = await runner.runTest(
 						"assert.isNotEmpty(document.querySelectorAll('h1'))",
@@ -410,9 +353,6 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return await runner.runTest(
 						"async () => await document.getElementById('audio').play()",
@@ -433,9 +373,6 @@ describe("Test Runner", () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return runner.runTest(
 						"localStorage.setItem('test', 'value'); assert.equal(localStorage.getItem('test'), 'value');",
@@ -458,9 +395,6 @@ const onSubmit = () => {
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 					});
 					return runner.runTest(
 						`const submitBtn = document.querySelector("button[type='submit']");
@@ -475,11 +409,7 @@ assert.equal(clicked, true);`,
 			it("should run the beforeAll function before evaluating the source", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "dom",
-						code: {
-							contents: "",
-						},
 						hooks: {
 							beforeAll: "window.__before = 'and so it begins'",
 						},
@@ -505,9 +435,6 @@ ReactDOM.render(JSX, document.getElementById('root'));</script></body>`;
 					const runner = await window.FCCSandbox.createTestRunner({
 						source,
 						type: "dom",
-						code: {
-							contents: "",
-						},
 						loadEnzyme: true,
 					});
 					return runner.runTest(
@@ -532,9 +459,6 @@ const waitThenUpdate = async () => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
 							type: "dom",
-							code: {
-								contents: "",
-							},
 							hooks: {
 								beforeAll,
 							},
@@ -564,9 +488,6 @@ assert.equal(document.getElementById('root').innerHTML, 'Updated');
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
 							type: "dom",
-							code: {
-								contents: "",
-							},
 							hooks: {
 								beforeAll,
 							},
@@ -615,9 +536,6 @@ const countDown = () => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							source,
 							type: "dom",
-							code: {
-								contents: "",
-							},
 							hooks: {
 								beforeAll,
 							},
@@ -693,11 +611,7 @@ const countDown = () => {
 			it("should not create a frame", async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "javascript",
-						code: {
-							contents: "",
-						},
 					});
 				});
 
@@ -772,11 +686,7 @@ const countDown = () => {
 			beforeAll(async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
-						source: "",
 						type: "python",
-						code: {
-							contents: "",
-						},
 					});
 				});
 			});
@@ -786,9 +696,6 @@ const countDown = () => {
 				const result = await page.evaluate(async (source) => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({
-						code: {
-							contents: "",
-						},
 						source,
 					});
 					return runner?.runTest(
@@ -807,21 +714,13 @@ test: () => assert.equal(runPython('get_five()'), 5),
 				await page.evaluate(async (source) => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({
-						code: {
-							contents: "",
-						},
 						source,
 					});
 				}, source);
 
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
-					await runner?.init({
-						code: {
-							contents: "",
-						},
-						source: "",
-					});
+					await runner?.init({});
 					return runner?.runTest(
 						`({
 test: () => assert.equal(runPython('get_five()'), 5),
@@ -842,12 +741,7 @@ test: () => assert.equal(runPython('get_five()'), 5),
 			it("should set __name__ to __main__ when running tests", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
-					await runner?.init({
-						code: {
-							contents: "",
-						},
-						source: "",
-					});
+					await runner?.init({});
 					return runner?.runTest(
 						`({
 test: () => assert.equal(runPython('__name__'), '__main__'),
@@ -865,7 +759,6 @@ test: () => assert.equal(runPython('__name__'), '__main__'),
 						code: {
 							contents: "# wrong comment for test",
 						},
-						source: "",
 					});
 					return runner?.runTest(`assert.equal(code, "# comment for test")`);
 				});
@@ -886,12 +779,7 @@ test: () => assert.equal(runPython('__name__'), '__main__'),
 			it("should reject testStrings that evaluate to an invalid object ", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
-					await runner?.init({
-						code: {
-							contents: "",
-						},
-						source: "",
-					});
+					await runner?.init({});
 					return runner?.runTest(`({ invalid: 'test' })`);
 				});
 
@@ -911,9 +799,6 @@ test: () => assert.equal(runPython('__name__'), '__main__'),
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({
-						code: {
-							contents: "",
-						},
 						source: `
 first = input()
 second = input()
@@ -935,7 +820,6 @@ second = input()
 						code: {
 							contents: "test = 'value'",
 						},
-						source: "",
 					});
 					return runner?.runTest(`({ 
   test: () => assert.equal(runPython('_code'), "test = 'value'")
@@ -948,12 +832,7 @@ second = input()
 			it("should make the AST helper available to the python code as _Node", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
-					await runner?.init({
-						code: {
-							contents: "",
-						},
-						source: "",
-					});
+					await runner?.init({});
 					return runner?.runTest(`({ 
   test: () => assert.equal(runPython('_Node("x = 1").get_variable("x")'), 1)
 })`);
@@ -965,12 +844,7 @@ second = input()
 			it("should return error types if the python code raises an exception", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
-					await runner?.init({
-						code: {
-							contents: "",
-						},
-						source: "",
-					});
+					await runner?.init({});
 					return runner?.runTest(`({
 	test: () => assert.equal(runPython('1 + "1"'), 2)
 })`);
@@ -997,9 +871,6 @@ pattern = re.compile('l+')
 				const result = await page.evaluate(async (source) => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({
-						code: {
-							contents: "",
-						},
 						source,
 					});
 					return runner?.runTest(`({ 
@@ -1027,9 +898,6 @@ pattern = re.compile('l+')`;
 				const result = await page.evaluate(async (source) => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({
-						code: {
-							contents: "",
-						},
 						source,
 					});
 					// since the comparison includes a PyProxy object, that will be

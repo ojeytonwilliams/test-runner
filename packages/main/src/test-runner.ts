@@ -45,7 +45,7 @@ type RunnerConfig = {
 };
 
 type InitOptions = {
-	code: {
+	code?: {
 		contents?: string;
 		editableContents?: string;
 	};

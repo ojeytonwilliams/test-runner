@@ -35,9 +35,9 @@ class PythonTestEvaluator implements TestEvaluator {
 	async init(opts: InitWorkerOptions) {
 		const pyodide = await this.#setupPyodide();
 		this.#runTest = async (testString) => {
-			const code = (opts.code.contents || "").slice();
+			const code = (opts.code?.contents ?? "").slice();
 			/* eslint-disable @typescript-eslint/no-unused-vars */
-			const editableContents = (opts.code.editableContents || "").slice();
+			const editableContents = (opts.code?.editableContents ?? "").slice();
 
 			const assert = chai.assert;
 			const __helpers = helpers;
@@ -114,7 +114,7 @@ class PythonTestEvaluator implements TestEvaluator {
 
 				// Evaluates the learner's code so that any variables they define are
 				// available to the test.
-				runPython(opts.source);
+				runPython(opts.source ?? "");
 
 				await test();
 

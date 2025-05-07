@@ -59,9 +59,9 @@ export class DOMTestEvaluator implements TestEvaluator {
 		const codeObj = opts.code;
 
 		/* eslint-disable @typescript-eslint/no-unused-vars */
-		const code = (codeObj.contents || "").slice();
+		const code = (codeObj?.contents ?? "").slice();
 
-		const editableContents = (codeObj.editableContents || "").slice();
+		const editableContents = (codeObj?.editableContents ?? "").slice();
 		// __testEditable allows test authors to run tests against a transitory dom
 		// element built using only the code in the editable region.
 		const __testEditable = (cb: () => () => unknown) => {
