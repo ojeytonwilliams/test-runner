@@ -125,6 +125,28 @@ describe("Test Runner", () => {
 					expect(result).toEqual({ pass: true });
 				},
 			);
+
+			it.each([
+				{ type: "dom" },
+				{ type: "javascript" },
+				{ type: "python" },
+			] as const)(
+				"should handle editableContents in the $type test evaluator",
+				async ({ type }) => {
+					const result = await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							type,
+							code: { editableContents: "find this" },
+						});
+
+						return runner.runTest(
+							"assert.equal(editableContents, 'find this')",
+						);
+					}, type);
+
+					expect(result).toEqual({ pass: true });
+				},
+			);
 		});
 
 		describe("iframe evaluators", () => {

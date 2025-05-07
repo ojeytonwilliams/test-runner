@@ -43,7 +43,7 @@ class FCCSandbox {
 		// TODO: can we avoid using `assetPath` and use `import.meta.url` instead?
 		assetPath?: string;
 		// the original user code, available for the tests to use.
-		code?: { contents: string; editableContents?: string };
+		code?: { contents?: string; editableContents?: string };
 		hooks?: {
 			beforeAll?: string;
 		};

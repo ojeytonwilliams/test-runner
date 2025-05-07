@@ -46,6 +46,8 @@ export class JavascriptTestEvaluator implements TestEvaluator {
 			try {
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const code = opts.code?.contents ?? "";
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const editableContents = opts.code?.editableContents ?? "";
 				try {
 					await eval(`${opts.source};
 __userCodeWasExecuted = true; 
