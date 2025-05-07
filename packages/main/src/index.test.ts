@@ -117,7 +117,7 @@ describe("Test Runner", () => {
 						const runner = await window.FCCSandbox.createTestRunner({ type });
 
 						const resultPromise = runner.runTest("assert.equal(1, 1)");
-						window.parent.postMessage({ type: "test" }, "*");
+						window.postMessage({ type: "test" }, "*");
 						return resultPromise;
 					}, type);
 
