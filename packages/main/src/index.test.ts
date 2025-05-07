@@ -141,7 +141,7 @@ describe("Test Runner", () => {
 			});
 		});
 
-		describe("iframe evaluators", () => {
+		describe("dom evaluator", () => {
 			afterAll(async () => {
 				await page.evaluate(() => {
 					window.FCCSandbox.getRunner("dom")?.dispose();
@@ -621,7 +621,7 @@ const countDown = () => {
 			});
 		});
 
-		describe("worker evaluators", () => {
+		describe("javascript evaluator", () => {
 			it("should not create a frame", async () => {
 				await page.evaluate(async () => {
 					await window.FCCSandbox.createTestRunner({
