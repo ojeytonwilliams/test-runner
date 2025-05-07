@@ -50,23 +50,6 @@ describe("Test Runner", () => {
 				expect(after).toBeFalsy();
 			});
 
-			it("should handle tests that throw errors", async () => {
-				const result = await page.evaluate(async () => {
-					const runner = await window.FCCSandbox.createTestRunner({
-						type: "dom",
-					});
-					return runner.runTest("throw new Error('test error')");
-				});
-
-				expect(result).toEqual({
-					err: {
-						message: "test error",
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-						stack: expect.stringMatching("Error: test error"),
-					},
-				});
-			});
-
 			it("should reuse old runners if createTestRunner is called multiple times", async () => {
 				const sameIframe = await page.evaluate(async () => {
 					const runnerOne = await window.FCCSandbox.createTestRunner({
@@ -107,13 +90,29 @@ describe("Test Runner", () => {
 				expect(sameWorker).toBe(true);
 			});
 
-			it.each([
+			describe.each([
 				{ type: "dom" },
 				{ type: "javascript" },
 				{ type: "python" },
-			] as const)(
-				"should ignore events that are not from the $type test evaluator",
-				async ({ type }) => {
+			] as const)("$type test evaluator", ({ type }) => {
+				it("should handle tests that throw errors", async () => {
+					const result = await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							type,
+						});
+						return runner.runTest("throw new Error('test error')");
+					}, type);
+
+					expect(result).toEqual({
+						err: {
+							message: "test error",
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							stack: expect.stringMatching("Error: test error"),
+						},
+					});
+				});
+
+				it("should ignore events that are not from the test evaluator", async () => {
 					const result = await page.evaluate(async (type) => {
 						const runner = await window.FCCSandbox.createTestRunner({ type });
 
@@ -123,16 +122,9 @@ describe("Test Runner", () => {
 					}, type);
 
 					expect(result).toEqual({ pass: true });
-				},
-			);
+				});
 
-			it.each([
-				{ type: "dom" },
-				{ type: "javascript" },
-				{ type: "python" },
-			] as const)(
-				"should handle editableContents in the $type test evaluator",
-				async ({ type }) => {
+				it("should handle editableContents", async () => {
 					const result = await page.evaluate(async (type) => {
 						const runner = await window.FCCSandbox.createTestRunner({
 							type,
@@ -145,8 +137,8 @@ describe("Test Runner", () => {
 					}, type);
 
 					expect(result).toEqual({ pass: true });
-				},
-			);
+				});
+			});
 		});
 
 		describe("iframe evaluators", () => {
@@ -798,7 +790,7 @@ test: () => assert.equal(runPython('__name__'), '__main__'),
 				});
 			});
 
-			it("should reject testStrings that evaluate to an invalid object ", async () => {
+			it("should reject testStrings that evaluate to an invalid object", async () => {
 				const result = await page.evaluate(async () => {
 					const runner = window.FCCSandbox.getRunner("python");
 					await runner?.init({});
