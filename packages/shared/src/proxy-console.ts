@@ -21,7 +21,10 @@ export class ProxyConsole {
 	}
 
 	on() {
-		if (this.#isOn) return;
+		if (this.#isOn)
+			throw Error(
+				"Console is already on. It is likely that tests are running in parallel. This is not supported.",
+			);
 		this.#isOn = true;
 
 		for (const level of LEVELS) {

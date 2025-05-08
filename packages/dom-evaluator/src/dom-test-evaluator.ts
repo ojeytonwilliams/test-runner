@@ -55,11 +55,12 @@ const removeTestScripts = () => {
 	hooksScript?.remove();
 };
 
+const proxyConsole = new ProxyConsole(window.console);
+
+const flushLogs = createLogFlusher(proxyConsole, format);
+
 export class DOMTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
-	#proxyConsole = new ProxyConsole(window.console);
-	#flushLogs = createLogFlusher(this.#proxyConsole, format);
-
 	async init(opts: InitTestFrameOptions) {
 		removeTestScripts();
 		const codeObj = opts.code;
@@ -123,7 +124,7 @@ export class DOMTestEvaluator implements TestEvaluator {
 		}
 
 		this.#runTest = async function (testString: string): Promise<Fail | Pass> {
-			this.#proxyConsole.on();
+			proxyConsole.on();
 			// uncomment the following line to inspect
 			// the frame-runner as it runs tests
 			// make sure the dev tools console is open
@@ -138,9 +139,9 @@ export class DOMTestEvaluator implements TestEvaluator {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 					await test();
 				}
-				return { pass: true, ...this.#flushLogs() };
+				return { pass: true, ...flushLogs() };
 			} catch (err) {
-				this.#proxyConsole.off();
+				proxyConsole.off();
 				if (!(err instanceof chai.AssertionError)) {
 					console.error(err);
 				}
@@ -156,8 +157,10 @@ export class DOMTestEvaluator implements TestEvaluator {
 						...(!!error.expected && { expected: error.expected }),
 						...(!!error.actual && { actual: error.actual }),
 					},
-					...this.#flushLogs(),
+					...flushLogs(),
 				};
+			} finally {
+				proxyConsole.off();
 			}
 		};
 

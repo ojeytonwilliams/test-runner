@@ -35,16 +35,17 @@ Object.freeze(self.assert);
 const wrapCode = (code: string) => `(async () => {${code};
 })();`;
 
+const proxyConsole = new ProxyConsole(self.console);
+const flushLogs = createLogFlusher(proxyConsole, format);
+
 // TODO: currently this is almost identical to DOMTestEvaluator, can we make
 // it more DRY? Don't attempt until they're both more fleshed out.
 export class JavascriptTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
-	#proxyConsole = new ProxyConsole(self.console);
-	#flushLogs = createLogFlusher(this.#proxyConsole, format);
 
 	init(opts: InitWorkerOptions) {
 		this.#runTest = async (rawTest) => {
-			this.#proxyConsole.on();
+			proxyConsole.on();
 			const test = wrapCode(rawTest);
 			// This can be reassigned by the eval inside the try block, so it should be declared as a let
 			// eslint-disable-next-line prefer-const
@@ -67,9 +68,9 @@ ${test};`);
 						await eval(test);
 					}
 				}
-				return { pass: true, ...this.#flushLogs() };
+				return { pass: true, ...flushLogs() };
 			} catch (err: unknown) {
-				this.#proxyConsole.off();
+				proxyConsole.off();
 				if (!(err instanceof AssertionError)) {
 					console.error(err);
 				}
@@ -82,8 +83,10 @@ ${test};`);
 						...(!!error.expected && { expected: error.expected }),
 						...(!!error.actual && { actual: error.actual }),
 					},
-					...this.#flushLogs(),
+					...flushLogs(),
 				};
+			} finally {
+				proxyConsole.off();
 			}
 		};
 	}
