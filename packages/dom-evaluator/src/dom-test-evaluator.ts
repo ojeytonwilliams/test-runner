@@ -1,6 +1,7 @@
 import jQuery from "jquery";
 import * as helpers from "@freecodecamp/curriculum-helpers";
 import FakeTimers from "@sinonjs/fake-timers";
+import chai from "chai";
 
 import type {
 	TestEvaluator,
@@ -37,11 +38,13 @@ declare global {
 	interface Window {
 		$: typeof jQuery;
 		__FakeTimers: typeof FakeTimers;
+		assert: typeof chai.assert;
 	}
 }
 
 window.$ = jQuery;
 window.__FakeTimers = FakeTimers;
+window.assert = chai.assert;
 
 // localStorage is not accessible in a sandboxed iframe, so we need to mock it
 Object.defineProperty(window, "localStorage", {
@@ -99,10 +102,6 @@ export class DOMTestEvaluator implements TestEvaluator {
 			return o;
 		};
 
-		const { default: chai } = await import(
-			/* webpackChunkName: "chai" */ "chai"
-		);
-		const assert = chai.assert;
 		const __helpers = helpers;
 		const __checkForBrowserExtensions = true;
 		/* eslint-enable @typescript-eslint/no-unused-vars */

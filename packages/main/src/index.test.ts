@@ -657,6 +657,29 @@ const countDown = () => {
 				expect(result).toEqual({ pass: true });
 			});
 
+			// TODO: give all evaluators beforeAll and beforeEach hooks
+			it("should have access to assert in the beforeAll function", async () => {
+				const source = `<script>
+const getFive = () => 5;
+</script>`;
+				const beforeAll = `const fn = () => assert.equal(getFive(), 5);`;
+				const result = await page.evaluate(
+					async (source, beforeAll) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							source,
+							type: "dom",
+							hooks: {
+								beforeAll,
+							},
+						});
+						return runner.runTest("fn()");
+					},
+					source,
+					beforeAll,
+				);
+				expect(result).toEqual({ pass: true });
+			});
+
 			it("should remove the test evaluator script after it has been evaluated", async () => {
 				const source = `<script></script>`;
 				const result = await page.evaluate(async (source) => {
