@@ -45,14 +45,13 @@ describe("DOMTestEvaluator", () => {
 		});
 
 		it("should handle a test that throws an error with expected and actual values", async () => {
-			const test =
-				"throw new chai.AssertionError('test error', { expected: 'expected', actual: 'actual' })";
+			const test = "assert.equal('actual', 'expected', 'test error')";
 
 			const result = await evaluator.runTest(test);
 
 			expect(result).toStrictEqual({
 				err: {
-					message: "test error",
+					message: "test error: expected 'actual' to equal 'expected'",
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					stack: expect.stringMatching("Error: test error"),
 					expected: "expected",

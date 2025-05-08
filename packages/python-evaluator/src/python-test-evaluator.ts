@@ -33,16 +33,20 @@ const serialize = (obj: unknown) =>
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
 	isProxy(obj) ? (obj.toJs().toString() as string) : obj;
 
-const proxyConsole = new ProxyConsole(self.console);
-const flushLogs = createLogFlusher(proxyConsole, format);
 class PythonTestEvaluator implements TestEvaluator {
 	#pyodide?: PyodideInterface;
 	#runTest?: TestEvaluator["runTest"];
+	#proxyConsole: ProxyConsole;
+	#flushLogs: ReturnType<typeof createLogFlusher>;
+	constructor(proxyConsole: ProxyConsole = new ProxyConsole(self.console)) {
+		this.#proxyConsole = proxyConsole;
+		this.#flushLogs = createLogFlusher(this.#proxyConsole, format);
+	}
 
 	async init(opts: InitWorkerOptions) {
 		const pyodide = await this.#setupPyodide();
 		this.#runTest = async (testString): Promise<Pass | Fail> => {
-			proxyConsole.on();
+			this.#proxyConsole.on();
 			const code = (opts.code?.contents ?? "").slice();
 			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const editableContents = (opts.code?.editableContents ?? "").slice();
@@ -72,7 +76,7 @@ class PythonTestEvaluator implements TestEvaluator {
 				// If the test string does not evaluate to an object, then we assume that
 				// it's a standard JS test and any assertions have already passed.
 				if (typeof evaluatedTestString !== "object") {
-					return { pass: true, ...flushLogs() };
+					return { pass: true, ...this.#flushLogs() };
 				}
 
 				if (!evaluatedTestString || !("test" in evaluatedTestString)) {
@@ -126,9 +130,9 @@ class PythonTestEvaluator implements TestEvaluator {
 
 				await test();
 
-				return { pass: true, ...flushLogs() };
+				return { pass: true, ...this.#flushLogs() };
 			} catch (err) {
-				proxyConsole.off();
+				this.#proxyConsole.off();
 				const error = err as PythonError;
 
 				if (!(error instanceof chai.AssertionError)) {
@@ -149,10 +153,10 @@ class PythonTestEvaluator implements TestEvaluator {
 						...(!!actual && { actual }),
 						type: error.type,
 					},
-					...flushLogs(),
+					...this.#flushLogs(),
 				};
 			} finally {
-				proxyConsole.off();
+				this.#proxyConsole.off();
 				__userGlobals.destroy();
 			}
 		};
