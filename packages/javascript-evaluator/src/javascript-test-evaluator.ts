@@ -1,4 +1,4 @@
-import { assert, AssertionError } from "chai";
+import { assert } from "chai";
 
 import * as curriculumHelpers from "@freecodecamp/curriculum-helpers";
 
@@ -73,9 +73,7 @@ ${test};`);
 				return { pass: true, ...this.#flushLogs() };
 			} catch (err: unknown) {
 				this.#proxyConsole.off();
-				if (!(err instanceof AssertionError)) {
-					console.error(err);
-				}
+				console.error(err);
 				const error = err as Fail["err"];
 
 				return {

@@ -143,9 +143,7 @@ export class DOMTestEvaluator implements TestEvaluator {
 				return { pass: true, ...this.#flushLogs() };
 			} catch (err) {
 				this.#proxyConsole.off();
-				if (!(err instanceof chai.AssertionError)) {
-					console.error(err);
-				}
+				console.error(err);
 
 				const error = err as Fail["err"];
 				// to provide useful debugging information when debugging the tests, we

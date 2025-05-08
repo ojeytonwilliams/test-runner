@@ -133,11 +133,8 @@ class PythonTestEvaluator implements TestEvaluator {
 				return { pass: true, ...this.#flushLogs() };
 			} catch (err) {
 				this.#proxyConsole.off();
+				console.error(err);
 				const error = err as PythonError;
-
-				if (!(error instanceof chai.AssertionError)) {
-					console.error(error);
-				}
 
 				const expected = serialize((err as { expected: unknown }).expected);
 				const actual = serialize((err as { actual: unknown }).actual);
