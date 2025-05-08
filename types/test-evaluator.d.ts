@@ -1,14 +1,21 @@
-export interface Pass {
+type Level = "log" | "warn" | "error" | "info" | "debug" | "trace";
+
+interface Logged {
+	logs?: { level: Level; msg: string }[];
+}
+
+export interface Pass extends Logged {
 	pass: true;
 }
 
-export interface Fail {
+export interface Fail extends Logged {
 	err: {
 		message: string;
 		stack?: string;
 		// TODO: enforce string for expected and actual?
 		expected?: unknown;
 		actual?: unknown;
+		type?: string;
 	};
 }
 

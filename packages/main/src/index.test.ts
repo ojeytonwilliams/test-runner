@@ -138,6 +138,93 @@ describe("Test Runner", () => {
 
 					expect(result).toEqual({ pass: true });
 				});
+
+				it("should return any logs generated during the tests", async () => {
+					const levels = ["error", "warn", "log", "info", "trace", "debug"];
+					const results = await page.evaluate(
+						async (type, levels) => {
+							const runner = await window.FCCSandbox.createTestRunner({
+								type,
+							});
+
+							const logs = [];
+
+							for (const level of levels) {
+								logs.push(
+									await runner.runTest(`console.${level}('test ${level}')`),
+								);
+							}
+
+							return logs;
+						},
+						type,
+						levels,
+					);
+
+					const expectedResults = levels.map((level) => ({
+						pass: true,
+						logs: [{ level, msg: `test ${level}` }],
+					}));
+
+					expect(results).toEqual(expectedResults);
+				});
+
+				it("should handle logs with multiple arguments", async () => {
+					const result = await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							type,
+						});
+
+						return runner.runTest("console.log('test log', 'test log 2')");
+					}, type);
+
+					expect(result).toEqual({
+						pass: true,
+						logs: [
+							{
+								level: "log",
+								msg: "test log test log 2",
+							},
+						],
+					});
+				});
+
+				it("should NOT return error logs generated after the test has finished", async () => {
+					const result = await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							type,
+						});
+						// non-chai errors thrown in the test will be logged.
+						return runner.runTest("throw new Error('test error')");
+					}, type);
+
+					expect(result).toEqual({
+						err: {
+							message: "test error",
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+							stack: expect.stringMatching("Error: test error"),
+						},
+					});
+				});
+
+				it("should console.error non-chai errors thrown in the test", async () => {
+					const spy = jest.fn();
+					page.once("console", (msg) => {
+						spy({ type: msg.type(), text: msg.text() });
+					});
+					await page.evaluate(async (type) => {
+						const runner = await window.FCCSandbox.createTestRunner({
+							type,
+						});
+						// non-chai errors thrown in the test should be logged.
+						return runner.runTest("throw new Error('test error')");
+					}, type);
+
+					expect(spy).toHaveBeenCalledWith({
+						type: "error",
+						text: "JSHandle@error",
+					});
+				});
 			});
 		});
 
@@ -532,7 +619,6 @@ const countDown = () => {
 	let count = 0;
 	return new Promise((resolve) => {
 		const interval = setInterval(() => {
-		console.log(count);
 			count++;
 			if (count === 50) {
 				clearInterval(interval);

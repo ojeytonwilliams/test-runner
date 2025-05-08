@@ -6,13 +6,17 @@ import pkg from "pyodide/package.json";
 import * as helpers from "@freecodecamp/curriculum-helpers";
 import chai from "chai";
 import {
+	Fail,
 	InitEvent,
 	InitWorkerOptions,
+	Pass,
 	TestEvaluator,
 	TestEvent,
 } from "../../../types/test-evaluator";
 import { ReadyEvent } from "../../../types/test-runner";
 import { postCloneableMessage } from "../../shared/src/messages";
+import { format } from "../../shared/src/format";
+import { ProxyConsole, createLogFlusher } from "../../shared/src/proxy-console";
 
 type EvaluatedTeststring = {
 	input?: string[];
@@ -32,9 +36,12 @@ const serialize = (obj: unknown) =>
 class PythonTestEvaluator implements TestEvaluator {
 	#pyodide?: PyodideInterface;
 	#runTest?: TestEvaluator["runTest"];
+	#proxyConsole = new ProxyConsole(self.console);
+	#flushLogs = createLogFlusher(this.#proxyConsole, format);
 	async init(opts: InitWorkerOptions) {
 		const pyodide = await this.#setupPyodide();
-		this.#runTest = async (testString) => {
+		this.#runTest = async (testString): Promise<Pass | Fail> => {
+			this.#proxyConsole.on();
 			const code = (opts.code?.contents ?? "").slice();
 			/* eslint-disable @typescript-eslint/no-unused-vars */
 			const editableContents = (opts.code?.editableContents ?? "").slice();
@@ -64,7 +71,7 @@ class PythonTestEvaluator implements TestEvaluator {
 				// If the test string does not evaluate to an object, then we assume that
 				// it's a standard JS test and any assertions have already passed.
 				if (typeof evaluatedTestString !== "object") {
-					return { pass: true };
+					return { pass: true, ...this.#flushLogs() };
 				}
 
 				if (!evaluatedTestString || !("test" in evaluatedTestString)) {
@@ -118,8 +125,9 @@ class PythonTestEvaluator implements TestEvaluator {
 
 				await test();
 
-				return { pass: true };
+				return { pass: true, ...this.#flushLogs() };
 			} catch (err) {
+				this.#proxyConsole.off();
 				const error = err as PythonError;
 
 				if (!(error instanceof chai.AssertionError)) {
@@ -140,6 +148,7 @@ class PythonTestEvaluator implements TestEvaluator {
 						...(!!actual && { actual }),
 						type: error.type,
 					},
+					...this.#flushLogs(),
 				};
 			} finally {
 				__userGlobals.destroy();

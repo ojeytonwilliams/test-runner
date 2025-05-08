@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import { assert, AssertionError } from "chai";
 
 import * as curriculumHelpers from "@freecodecamp/curriculum-helpers";
 
@@ -11,6 +11,8 @@ import type {
 } from "../../../types/test-evaluator";
 import type { ReadyEvent } from "../../../types/test-runner";
 import { postCloneableMessage } from "../../shared/src/messages";
+import { format } from "../../shared/src/format";
+import { ProxyConsole, createLogFlusher } from "../../shared/src/proxy-console";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 declare global {
@@ -37,8 +39,12 @@ const wrapCode = (code: string) => `(async () => {${code};
 // it more DRY? Don't attempt until they're both more fleshed out.
 export class JavascriptTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
+	#proxyConsole = new ProxyConsole(self.console);
+	#flushLogs = createLogFlusher(this.#proxyConsole, format);
+
 	init(opts: InitWorkerOptions) {
 		this.#runTest = async (rawTest) => {
+			this.#proxyConsole.on();
 			const test = wrapCode(rawTest);
 			// This can be reassigned by the eval inside the try block, so it should be declared as a let
 			// eslint-disable-next-line prefer-const
@@ -61,9 +67,14 @@ ${test};`);
 						await eval(test);
 					}
 				}
-				return { pass: true };
-			} catch (e: unknown) {
-				const error = e as Fail["err"];
+				return { pass: true, ...this.#flushLogs() };
+			} catch (err: unknown) {
+				this.#proxyConsole.off();
+				if (!(err instanceof AssertionError)) {
+					console.error(err);
+				}
+				const error = err as Fail["err"];
+
 				return {
 					err: {
 						message: error.message,
@@ -71,6 +82,7 @@ ${test};`);
 						...(!!error.expected && { expected: error.expected }),
 						...(!!error.actual && { actual: error.actual }),
 					},
+					...this.#flushLogs(),
 				};
 			}
 		};

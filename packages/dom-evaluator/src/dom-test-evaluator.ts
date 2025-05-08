@@ -7,6 +7,7 @@ import type {
 	Fail,
 	TestEvent,
 	InitEvent,
+	Pass,
 } from "../../../types/test-evaluator";
 import type { ReadyEvent } from "../../../types/test-runner";
 
@@ -16,6 +17,8 @@ import {
 	TEST_EVALUATOR_HOOKS_ID,
 } from "../../shared/src/ids";
 import { MockLocalStorage } from "./mock-local-storage";
+import { createLogFlusher, ProxyConsole } from "../../shared/src/proxy-console";
+import { format } from "../../shared/src/format";
 
 const READY_MESSAGE: ReadyEvent["data"] = { type: "ready" };
 
@@ -54,6 +57,9 @@ const removeTestScripts = () => {
 
 export class DOMTestEvaluator implements TestEvaluator {
 	#runTest?: TestEvaluator["runTest"];
+	#proxyConsole = new ProxyConsole(window.console);
+	#flushLogs = createLogFlusher(this.#proxyConsole, format);
+
 	async init(opts: InitTestFrameOptions) {
 		removeTestScripts();
 		const codeObj = opts.code;
@@ -116,9 +122,8 @@ export class DOMTestEvaluator implements TestEvaluator {
 			/* eslint-enable prefer-const */
 		}
 
-		this.#runTest = async function (
-			testString: string,
-		): Promise<Fail | { pass: true }> {
+		this.#runTest = async function (testString: string): Promise<Fail | Pass> {
+			this.#proxyConsole.on();
 			// uncomment the following line to inspect
 			// the frame-runner as it runs tests
 			// make sure the dev tools console is open
@@ -133,8 +138,9 @@ export class DOMTestEvaluator implements TestEvaluator {
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 					await test();
 				}
-				return { pass: true };
+				return { pass: true, ...this.#flushLogs() };
 			} catch (err) {
+				this.#proxyConsole.off();
 				if (!(err instanceof chai.AssertionError)) {
 					console.error(err);
 				}
@@ -150,6 +156,7 @@ export class DOMTestEvaluator implements TestEvaluator {
 						...(!!error.expected && { expected: error.expected }),
 						...(!!error.actual && { actual: error.actual }),
 					},
+					...this.#flushLogs(),
 				};
 			}
 		};
