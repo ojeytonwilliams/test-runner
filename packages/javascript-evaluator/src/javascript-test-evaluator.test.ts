@@ -6,9 +6,9 @@ describe("JavascriptTestEvaluator", () => {
 	let evaluator: JavascriptTestEvaluator;
 
 	beforeEach(() => {
+		jest.spyOn(console, "error").mockImplementation(jest.fn());
 		evaluator = new JavascriptTestEvaluator();
 		evaluator.init({ code: {}, source: "" });
-		jest.spyOn(console, "error").mockImplementation(jest.fn());
 	});
 
 	afterEach(() => {
