@@ -728,6 +728,33 @@ const getFive = () => 5;
 					pass: true,
 				});
 			});
+
+			it.each([
+				{ method: "prompt" },
+				{ method: "alert" },
+				{ method: "confirm" },
+			])("should handle calls to window.$method", async ({ method }) => {
+				const consoleSpy = jest.fn();
+
+				page.once("console", (msg) => {
+					consoleSpy(msg.text());
+				});
+
+				const result = await page.evaluate(async (method) => {
+					const runner = await window.FCCSandbox.createTestRunner({
+						type: "dom",
+					});
+					return runner.runTest(`window.${method}('test ${method}')`);
+				}, method);
+
+				expect(consoleSpy).toHaveBeenCalledWith(
+					`Ignored call to '${method}()'. The document is sandboxed, and the 'allow-modals' keyword is not set.`,
+				);
+
+				expect(result).toEqual({
+					pass: true,
+				});
+			});
 		});
 
 		describe("javascript evaluator", () => {
