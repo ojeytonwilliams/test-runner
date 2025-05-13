@@ -105,7 +105,6 @@ export class DOMTestEvaluator implements TestEvaluator {
 		};
 
 		const __helpers = helpers;
-		const __checkForBrowserExtensions = true;
 		/* eslint-enable @typescript-eslint/no-unused-vars */
 
 		let Enzyme;
