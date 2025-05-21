@@ -1,5 +1,6 @@
 {
-  "include": ["types/*.d.ts"],
+  "include": [],
+  "files": [],
   "references": [
     {
       "path": "./packages/main"

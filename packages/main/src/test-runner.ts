@@ -1,4 +1,4 @@
-import type { ReadyEvent, ResultEvent } from "../../../types/test-runner";
+import type { ReadyEvent, ResultEvent } from "../../shared/types/test-runner";
 import type {
 	InitEvent,
 	TestEvent,
@@ -6,7 +6,7 @@ import type {
 	InitTestFrameOptions,
 	Pass,
 	Fail,
-} from "../../../types/test-evaluator";
+} from "../../shared/types/test-evaluator";
 
 import {
 	TEST_EVALUATOR_SCRIPT_ID,

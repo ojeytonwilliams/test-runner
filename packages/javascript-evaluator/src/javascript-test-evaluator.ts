@@ -8,8 +8,8 @@ import type {
 	InitEvent,
 	TestEvent,
 	InitWorkerOptions,
-} from "../../../types/test-evaluator";
-import type { ReadyEvent } from "../../../types/test-runner";
+} from "../../shared/types/test-evaluator";
+import type { ReadyEvent } from "../../shared/types/test-runner";
 import { postCloneableMessage } from "../../shared/src/messages";
 import { format } from "../../shared/src/format";
 import { ProxyConsole, createLogFlusher } from "../../shared/src/proxy-console";

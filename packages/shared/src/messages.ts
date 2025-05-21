@@ -1,4 +1,4 @@
-import type { Pass, Fail } from "../../../types/test-evaluator";
+import type { Pass, Fail } from "../types/test-evaluator";
 import { format } from "./format";
 
 type Message = {
